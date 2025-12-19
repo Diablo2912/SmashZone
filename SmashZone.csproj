@@ -103,8 +103,18 @@
     <Content Include="App_Data\SmashZone_log.ldf">
       <DependentUpon>SmashZone.mdf</DependentUpon>
     </Content>
+    <Content Include="Images\badminton.png" />
+    <Content Include="Images\running.png" />
+    <Content Include="Images\ya11.png" />
+    <Content Include="Images\2.jpg" />
+    <Content Include="Images\3.jpg" />
+    <Content Include="Images\4.jpg" />
+    <Content Include="Images\ya77.png" />
+    <Content Include="Images\yn1000.png" />
     <Content Include="Pages\Admin\manageProducts.aspx" />
     <Content Include="Pages\User\About.aspx" />
+    <Content Include="Pages\User\aboutUs.aspx" />
+    <Content Include="Pages\User\accountDetails.aspx" />
     <Content Include="Pages\User\Cart.aspx" />
     <Content Include="Pages\User\Contact.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
@@ -227,6 +237,20 @@
       <DependentUpon>About.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Pages\User\aboutUs.aspx.cs">
+      <DependentUpon>aboutUs.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\User\aboutUs.aspx.designer.cs">
+      <DependentUpon>aboutUs.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\accountDetails.aspx.cs">
+      <DependentUpon>accountDetails.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\User\accountDetails.aspx.designer.cs">
+      <DependentUpon>accountDetails.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Pages\User\Cart.aspx.cs">
       <DependentUpon>Cart.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -288,9 +312,7 @@
       <DependentUpon>Site.Master</DependentUpon>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Images\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
     <Content Include="Scripts\jquery-3.7.0.slim.min.map" />
