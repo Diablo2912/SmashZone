@@ -60,7 +60,7 @@ namespace SmashZone.Pages.User
 
                             string storedHash = rdr["Password"].ToString();
 
-                            // IMPORTANT: VerifyHash must exist in your Hash.cs
+                            // Verify password using your Hash.cs
                             bool ok = Hash.VerifyHash(password, "SHA512", storedHash);
 
                             if (!ok)
@@ -74,16 +74,38 @@ namespace SmashZone.Pages.User
                                 return;
                             }
 
-                            // login success
+                            // ✅ Read Two_Factor_Status safely (bit/bool/string)
+                            bool twoFAEnabled = false;
+                            object twoFAObj = rdr["Two_Factor_Status"];
+
+                            if (twoFAObj != DBNull.Value)
+                            {
+                                // Works for BIT (0/1), bool, or "True"/"False"
+                                if (twoFAObj is bool b) twoFAEnabled = b;
+                                else if (twoFAObj is int i) twoFAEnabled = (i == 1);
+                                else twoFAEnabled = twoFAObj.ToString().Equals("true", StringComparison.OrdinalIgnoreCase)
+                                                 || twoFAObj.ToString() == "1";
+                            }
+
+                            // ✅ Set session first (important!)
                             Session["AccountId"] = rdr["Id"].ToString();
                             Session["FirstName"] = rdr["First_Name"].ToString();
                             Session["LastName"] = rdr["Last_Name"].ToString();
                             Session["Email"] = rdr["Email"].ToString();
                             Session["Role"] = rdr["Role"].ToString();
-                            Session["TwoFA"] = rdr["Two_Factor_Status"].ToString();
+                            Session["TwoFA"] = twoFAEnabled ? "True" : "False";
 
+                            // Optional: masterpage switching logic (your BasePage already does this though)
                             Session["CHANGE_MASTERPAGE"] = "~/Master_Pages/UserLogin.Master";
 
+                            // ✅ If 2FA enabled -> go to OTP page
+                            if (twoFAEnabled)
+                            {
+                                Response.Redirect("~/Pages/User/2fa.aspx");
+                                return;
+                            }
+
+                            // ✅ Otherwise -> normal login success
                             Response.Redirect("~/Pages/User/Default.aspx");
                         }
                     }

@@ -112,6 +112,7 @@
     <Content Include="Images\ya77.png" />
     <Content Include="Images\yn1000.png" />
     <Content Include="Pages\Admin\manageProducts.aspx" />
+    <Content Include="Pages\User\2fa.aspx" />
     <Content Include="Pages\User\About.aspx" />
     <Content Include="Pages\User\aboutUs.aspx" />
     <Content Include="Pages\User\accountDetails.aspx" />
@@ -206,6 +207,7 @@
     <Compile Include="App_Code\BasePage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
+    <Compile Include="App_Code\Email.cs" />
     <Compile Include="App_Code\Hash.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="Master_Pages\AdminLogin.Master.cs">
@@ -228,6 +230,13 @@
     </Compile>
     <Compile Include="Pages\Admin\manageProducts.aspx.designer.cs">
       <DependentUpon>manageProducts.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\2fa.aspx.cs">
+      <DependentUpon>2fa.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\User\2fa.aspx.designer.cs">
+      <DependentUpon>2fa.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\User\About.aspx.cs">
       <DependentUpon>About.aspx</DependentUpon>
