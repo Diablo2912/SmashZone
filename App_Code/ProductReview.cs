@@ -8,7 +8,7 @@ namespace SmashZone.App_Code
     public class ProductReview
     {
         private static string ConnStr =>
-            ConfigurationManager.ConnectionStrings["SmashZoneDB"].ConnectionString;
+            ConfigurationManager.ConnectionStrings["SmashZoneCS"].ConnectionString;
 
         public static void UpsertReview(int productId, int accountId, int rating, string comment)
         {

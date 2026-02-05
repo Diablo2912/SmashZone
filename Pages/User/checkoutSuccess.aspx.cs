@@ -201,5 +201,96 @@ END";
                 : "alert alert-success mt-3";
             lblEmailStatus.Text = msg;
         }
+
+        private void DeductStockFromSession(Session stripeSession)
+        {
+            if (Session["AccountId"] == null) return;
+
+            string connStr = ConfigurationManager.ConnectionStrings["SmashZoneCS"].ConnectionString;
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                using (SqlTransaction tx = conn.BeginTransaction())
+                {
+                    // 1) Make sure we haven't deducted stock for this session before
+                    using (SqlCommand checkCmd = new SqlCommand(@"
+SELECT StockDeducted 
+FROM dbo.Transactions 
+WHERE StripeSessionId = @sid;", conn, tx))
+                    {
+                        checkCmd.Parameters.AddWithValue("@sid", stripeSession.Id);
+
+                        object val = checkCmd.ExecuteScalar();
+                        if (val != null && val != DBNull.Value && Convert.ToBoolean(val) == true)
+                        {
+                            tx.Commit(); // already done
+                            return;
+                        }
+                    }
+
+                    // 2) Deduct stock for each line item
+                    if (stripeSession.LineItems?.Data != null)
+                    {
+                        foreach (var li in stripeSession.LineItems.Data)
+                        {
+                            int qty = (int)(li.Quantity ?? 1);
+
+                            // ✅ BEST: get ProductId from metadata (see section 3)
+                            int productId = GetProductIdFromLineItem(li, conn, tx);
+
+                            // Deduct with safety check (no negative stock)
+                            using (SqlCommand deductCmd = new SqlCommand(@"
+UPDATE dbo.Products
+SET StockQty = StockQty - @qty
+WHERE ProductId = @pid
+  AND StockQty >= @qty;", conn, tx))
+                            {
+                                deductCmd.Parameters.AddWithValue("@qty", qty);
+                                deductCmd.Parameters.AddWithValue("@pid", productId);
+
+                                int rows = deductCmd.ExecuteNonQuery();
+                                if (rows == 0)
+                                {
+                                    // Not enough stock (or product not found)
+                                    throw new Exception("Insufficient stock for ProductId " + productId);
+                                }
+                            }
+                        }
+                    }
+
+                    // 3) Mark as deducted
+                    using (SqlCommand markCmd = new SqlCommand(@"
+UPDATE dbo.Transactions 
+SET StockDeducted = 1 
+WHERE StripeSessionId = @sid;", conn, tx))
+                    {
+                        markCmd.Parameters.AddWithValue("@sid", stripeSession.Id);
+                        markCmd.ExecuteNonQuery();
+                    }
+
+                    tx.Commit();
+                }
+            }
+        }
+
+        private int GetProductIdFromLineItem(LineItem li, SqlConnection conn, SqlTransaction tx)
+        {
+            // If you don't have metadata yet, you can fallback by matching name/description,
+            // but metadata is MUCH safer.
+            string name = li.Description ?? "";
+
+            using (SqlCommand cmd = new SqlCommand(@"
+SELECT TOP 1 ProductId 
+FROM dbo.Products
+WHERE ProductName = @name;", conn, tx))
+            {
+                cmd.Parameters.AddWithValue("@name", name);
+                object result = cmd.ExecuteScalar();
+                if (result == null) throw new Exception("Product not found: " + name);
+                return Convert.ToInt32(result);
+            }
+        }
+
     }
 }

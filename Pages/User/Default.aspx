@@ -150,7 +150,7 @@
                 <img src="/Images/banner2.png" class="d-block carousel-img" alt="Slide 2" />
             </div>
             <div class="carousel-item" data-bs-interval="5000">
-                <img src="/Images/banner    .png" class="d-block carousel-img" alt="Slide 3" />
+                <img src="/Images/banner3.png" class="d-block carousel-img" alt="Slide 3" />
             </div>
         </div>
 

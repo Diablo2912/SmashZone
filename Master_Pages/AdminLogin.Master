@@ -171,10 +171,6 @@
         </div>
     </li>
 
-    <!-- NORMAL LINKS -->
-    <li class="nav-item">
-        <a class="nav-link" runat="server" href="~/Pages/User/Cart.aspx">Cart</a>
-    </li>
 
     <!-- ABOUT -->
     <li class="nav-item dropdown">
