@@ -26,7 +26,7 @@
             gap: 1rem;
             overflow-x: auto;
             scroll-behavior: smooth;
-            padding: 0.25rem 0;
+            padding: 0.5rem 0;
             scrollbar-width: none;
         }
 
@@ -34,9 +34,10 @@
             display: none;
         }
 
+        /* === SHOW 3 CARDS PER VIEW (DESKTOP) === */
         .sport-card {
-            flex: 0 0 calc(25% - 0.75rem);
-            min-width: calc(25% - 0.75rem);
+            flex: 0 0 calc(33.333% - 0.67rem);
+            min-width: calc(33.333% - 0.67rem);
         }
 
         .sport-card .card-img-top {
@@ -70,6 +71,7 @@
             right: -10px;
         }
 
+        /* ===== TABLET: 2 CARDS ===== */
         @media (max-width: 991px) {
             .sport-card {
                 flex: 0 0 calc(50% - 0.5rem);
@@ -77,6 +79,7 @@
             }
         }
 
+        /* ===== MOBILE: 1 CARD ===== */
         @media (max-width: 575px) {
             .sport-card {
                 flex: 0 0 100%;
@@ -84,7 +87,7 @@
             }
         }
 
-        /* ===================== FEATURED PRODUCTS (ARCSABER STYLE) ===================== */
+        /* ===================== FEATURED PRODUCTS ===================== */
         .featured-card {
             border: 1px solid #dee2e6;
             border-radius: 8px;
@@ -141,13 +144,13 @@
 
         <div class="carousel-inner">
             <div class="carousel-item active" data-bs-interval="5000">
-                <img src="/Images/4.jpg" class="d-block carousel-img" alt="Slide 1" />
+                <img src="/Images/banner1.png" class="d-block carousel-img" alt="Slide 1" />
             </div>
             <div class="carousel-item" data-bs-interval="5000">
-                <img src="/Images/3.jpg" class="d-block carousel-img" alt="Slide 2" />
+                <img src="/Images/banner2.png" class="d-block carousel-img" alt="Slide 2" />
             </div>
             <div class="carousel-item" data-bs-interval="5000">
-                <img src="/Images/2.jpg" class="d-block carousel-img" alt="Slide 3" />
+                <img src="/Images/banner    .png" class="d-block carousel-img" alt="Slide 3" />
             </div>
         </div>
 
@@ -164,9 +167,6 @@
     <h4 class="mb-4">Browse By Sport</h4>
 
     <div class="sport-strip-wrap mb-5">
-
-        <button class="sport-arrow left" type="button" onclick="scrollSports(-1)">‹</button>
-        <button class="sport-arrow right" type="button" onclick="scrollSports(1)">›</button>
 
         <div id="sportStrip" class="sport-strip">
 
@@ -200,16 +200,6 @@
                 </div>
             </div>
 
-            <div class="sport-card">
-                <div class="card h-100">
-                    <img src="/Images/pickleball.jpg" class="card-img-top" alt="Pickleball" />
-                    <div class="card-body text-center">
-                        <h6 class="card-title">Pickleball</h6>
-                        <a href="Products.aspx?category=Pickleball" class="btn btn-sm btn-primary">View</a>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
 
@@ -229,13 +219,8 @@
                         </div>
 
                         <div class="card-body featured-body text-center">
-                            <h5 class="featured-title">
-                                <%# Eval("ProductTitle") %>
-                            </h5>
-
-                            <p class="featured-price">
-                                $<%# Eval("ProductPrice", "{0:F2}") %>
-                            </p>
+                            <h5 class="featured-title"><%# Eval("ProductTitle") %></h5>
+                            <p class="featured-price">$<%# Eval("ProductPrice", "{0:F2}") %></p>
                         </div>
 
                     </div>

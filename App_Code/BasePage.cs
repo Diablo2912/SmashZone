@@ -1,20 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
-using SmashZone.App_Code;
 
-namespace SmashZone.App_Code
+namespace SmashZone
 {
     public class BasePage : Page
     {
         protected override void OnPreInit(EventArgs e)
         {
-            if (Session["AccountId"] != null)
-                MasterPageFile = "~/Master_Pages/UserLogin.Master";
-            else
+            // Not logged in
+            if (Session["AccountId"] == null)
+            {
                 MasterPageFile = "~/Master_Pages/Site.Master";
+            }
+            else
+            {
+                // Logged in: check role
+                string role = Session["Role"]?.ToString();
+
+                if (role == "Admin")
+                    MasterPageFile = "~/Master_Pages/AdminLogin.Master";
+                else
+                    MasterPageFile = "~/Master_Pages/UserLogin.Master";
+            }
 
             base.OnPreInit(e);
         }

@@ -11,61 +11,52 @@ namespace SmashZone.Pages.User
 {
 
 
-    public partial class Cart
+    public partial class checkout
     {
 
         /// <summary>
-        /// pnlEmpty control.
+        /// btnPay control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlEmpty;
+        protected global::System.Web.UI.WebControls.Button btnPay;
 
         /// <summary>
-        /// pnlCart control.
+        /// pnlErr control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlCart;
+        protected global::System.Web.UI.WebControls.Panel pnlErr;
 
         /// <summary>
-        /// rptCart control.
+        /// lblErr control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptCart;
+        protected global::System.Web.UI.WebControls.Label lblErr;
 
         /// <summary>
-        /// btnClear control.
+        /// rptSummary control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton btnClear;
+        protected global::System.Web.UI.WebControls.Repeater rptSummary;
 
         /// <summary>
-        /// btnCheckout control.
+        /// lblTotal control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton btnCheckout;
-
-        /// <summary>
-        /// lblGrandTotal control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblGrandTotal;
+        protected global::System.Web.UI.WebControls.Label lblTotal;
     }
 }

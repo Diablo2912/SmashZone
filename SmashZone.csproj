@@ -44,12 +44,29 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.1.1.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Stripe.net, Version=50.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Stripe.net.50.3.0\lib\net462\Stripe.net.dll</HintPath>
+    </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Threading.Tasks.Extensions.4.5.2\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
@@ -104,19 +121,33 @@
       <DependentUpon>SmashZone.mdf</DependentUpon>
     </Content>
     <Content Include="Images\badminton.png" />
+    <Content Include="Images\banner1.png" />
+    <Content Include="Images\banner2.png" />
+    <Content Include="Images\banner3.png" />
+    <Content Include="Images\banner4.png" />
+    <Content Include="Images\Product_Img\0398955ea1a64a5cb3c0c544e223eae8.jpeg" />
+    <Content Include="Images\Product_Img\17dfe4683ddc44c3969936bc8c284ec4.png" />
+    <Content Include="Images\Product_Img\4f26be1bcbea4b94aa0bdc8325c07ca8.jpeg" />
+    <Content Include="Images\Product_Img\5681b5950fb940d699173aa950e0d4b9.png" />
+    <Content Include="Images\Product_Img\705549b7ec59488c8929be9d0ef6a9e9.png" />
+    <Content Include="Images\Product_Img\8fca73beda94434d823e4c52fcfba343.png" />
+    <Content Include="Images\Product_Img\f42aa6cdcd5c4f4093fa61d3b468fb47.jpeg" />
+    <Content Include="Images\Product_Img\fd045bc69394443994b41fa9f8ad5c92.png" />
     <Content Include="Images\running.png" />
     <Content Include="Images\ya11.png" />
-    <Content Include="Images\2.jpg" />
-    <Content Include="Images\3.jpg" />
-    <Content Include="Images\4.jpg" />
     <Content Include="Images\ya77.png" />
     <Content Include="Images\yn1000.png" />
+    <Content Include="Pages\Admin\addProducts.aspx" />
+    <Content Include="Pages\Admin\dashboard.aspx" />
+    <Content Include="Pages\Admin\editProducts.aspx" />
     <Content Include="Pages\Admin\manageProducts.aspx" />
     <Content Include="Pages\User\2fa.aspx" />
     <Content Include="Pages\User\About.aspx" />
     <Content Include="Pages\User\aboutUs.aspx" />
     <Content Include="Pages\User\accountDetails.aspx" />
     <Content Include="Pages\User\Cart.aspx" />
+    <Content Include="Pages\User\checkout.aspx" />
+    <Content Include="Pages\User\checkoutSuccess.aspx" />
     <Content Include="Pages\User\Contact.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
@@ -140,8 +171,13 @@
     <Content Include="Global.asax" />
     <Content Include="Pages\User\Faq.aspx" />
     <Content Include="Pages\User\Login.aspx" />
-    <Content Include="Pages\User\Products.aspx" />
+    <Content Include="Pages\User\productDetails.aspx" />
+    <Content Include="Pages\User\badmintonProducts.aspx" />
+    <Content Include="Pages\User\Search.aspx" />
     <Content Include="Pages\User\signUp.aspx" />
+    <Content Include="Pages\User\squashProducts.aspx" />
+    <Content Include="Pages\User\tennisProducts.aspx" />
+    <Content Include="Pages\User\transactionHistory.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -209,6 +245,8 @@
     </Compile>
     <Compile Include="App_Code\Email.cs" />
     <Compile Include="App_Code\Hash.cs" />
+    <Compile Include="App_Code\Product.cs" />
+    <Compile Include="App_Code\ProductReview.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="Master_Pages\AdminLogin.Master.cs">
       <DependentUpon>AdminLogin.Master</DependentUpon>
@@ -223,6 +261,27 @@
     </Compile>
     <Compile Include="Master_Pages\UserLogin.Master.designer.cs">
       <DependentUpon>UserLogin.Master</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\addProducts.aspx.cs">
+      <DependentUpon>addProducts.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\addProducts.aspx.designer.cs">
+      <DependentUpon>addProducts.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\dashboard.aspx.cs">
+      <DependentUpon>dashboard.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\dashboard.aspx.designer.cs">
+      <DependentUpon>dashboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\Admin\editProducts.aspx.cs">
+      <DependentUpon>editProducts.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\Admin\editProducts.aspx.designer.cs">
+      <DependentUpon>editProducts.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Admin\manageProducts.aspx.cs">
       <DependentUpon>manageProducts.aspx</DependentUpon>
@@ -267,6 +326,20 @@
     <Compile Include="Pages\User\Cart.aspx.designer.cs">
       <DependentUpon>Cart.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Pages\User\checkout.aspx.cs">
+      <DependentUpon>checkout.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\User\checkout.aspx.designer.cs">
+      <DependentUpon>checkout.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\checkoutSuccess.aspx.cs">
+      <DependentUpon>checkoutSuccess.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\User\checkoutSuccess.aspx.designer.cs">
+      <DependentUpon>checkoutSuccess.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Pages\User\Contact.aspx.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -298,12 +371,26 @@
     <Compile Include="Pages\User\Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Pages\User\Products.aspx.cs">
-      <DependentUpon>Products.aspx</DependentUpon>
+    <Compile Include="Pages\User\productDetails.aspx.cs">
+      <DependentUpon>productDetails.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\User\Products.aspx.designer.cs">
-      <DependentUpon>Products.aspx</DependentUpon>
+    <Compile Include="Pages\User\productDetails.aspx.designer.cs">
+      <DependentUpon>productDetails.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\badmintonProducts.aspx.cs">
+      <DependentUpon>badmintonProducts.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\User\badmintonProducts.aspx.designer.cs">
+      <DependentUpon>badmintonProducts.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\Search.aspx.cs">
+      <DependentUpon>Search.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\User\Search.aspx.designer.cs">
+      <DependentUpon>Search.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\User\signUp.aspx.cs">
       <DependentUpon>signUp.aspx</DependentUpon>
@@ -311,6 +398,27 @@
     </Compile>
     <Compile Include="Pages\User\signUp.aspx.designer.cs">
       <DependentUpon>signUp.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\squashProducts.aspx.cs">
+      <DependentUpon>squashProducts.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\User\squashProducts.aspx.designer.cs">
+      <DependentUpon>squashProducts.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\tennisProducts.aspx.cs">
+      <DependentUpon>tennisProducts.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\User\tennisProducts.aspx.designer.cs">
+      <DependentUpon>tennisProducts.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\User\transactionHistory.aspx.cs">
+      <DependentUpon>transactionHistory.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\User\transactionHistory.aspx.designer.cs">
+      <DependentUpon>transactionHistory.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Master_Pages\Site.Master.cs">

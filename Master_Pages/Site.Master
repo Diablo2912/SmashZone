@@ -24,12 +24,77 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <style>
+        .navbar { padding-top: .7rem; padding-bottom: .7rem; }
+        .navbar .nav-link {
+            padding-top: .25rem;
+            padding-bottom: .25rem;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+        }
+        .navbar .dropdown-toggle::after {
+            margin-left: .35rem;
+            align-self: center;
+        }
+
+        /* ================= MEGA MENU ================= */
+        .mega-dropdown .dropdown-menu {
+            width: min(950px, 96vw);
+            padding: 22px 22px;
+            border-radius: 14px;
+            border: 1px solid rgba(0,0,0,.08);
+            box-shadow: 0 18px 40px rgba(0,0,0,.15);
+        }
+
+        .mega-title {
+            font-weight: 800;
+            letter-spacing: .02em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-size: .95rem;
+        }
+
+        .mega-link {
+            display: block;
+            padding: 8px 0;
+            color: #111;
+            text-decoration: none;
+        }
+
+        .mega-link:hover {
+            text-decoration: underline;
+        }
+
+        .mega-col + .mega-col {
+            border-left: 1px solid rgba(0,0,0,.08);
+        }
+
+        @media (max-width: 991px) {
+            .mega-dropdown .dropdown-menu {
+                width: 100%;
+                padding: 12px;
+            }
+            .mega-col + .mega-col {
+                border-left: none;
+                border-top: 1px solid rgba(0,0,0,.08);
+                margin-top: 12px;
+                padding-top: 12px;
+            }
+        }
+
+        /* OPTIONAL: hover open on desktop only */
+        @media (min-width: 992px) {
+            .mega-dropdown:hover .dropdown-menu { display: block; }
+            .mega-dropdown:hover > .dropdown-toggle { color: #fff; }
+        }
+    </style>
 </head>
 
 <body>
 <form runat="server">
 
-    <!-- ScriptManager (keep for WebForms only) -->
     <asp:ScriptManager runat="server">
         <Scripts>
             <asp:ScriptReference Name="MsAjaxBundle" />
@@ -58,23 +123,73 @@
                 <!-- LEFT SIDE LINKS -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                    <li class="nav-item">
-                        <a class="nav-link" runat="server" href="~/Pages/User/Products.aspx">Products</a>
+                    <!-- MEGA MENU -->
+                    <li class="nav-item dropdown mega-dropdown">
+                        <a class="nav-link dropdown-toggle"
+                           href="#"
+                           id="shopDropdown"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            Shop
+                        </a>
+
+                        <div class="dropdown-menu" aria-labelledby="shopDropdown">
+                            <div class="row g-0">
+
+                                <!-- SPORTS -->
+                                <div class="col-lg-4 mega-col px-lg-3">
+                                    <div class="mega-title">Sports</div>
+
+                                    <!-- Sport pages (no category filter) -->
+                                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx">Badminton</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx">Tennis</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx">Squash</a>
+                                </div>
+
+                                <!-- SHOES -->
+                                <div class="col-lg-4 mega-col px-lg-3">
+                                    <div class="mega-title">Shoes</div>
+
+                                    <!-- Filter by ProductCategory=Shoes -->
+                                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx?category=Shoes">Badminton Shoes</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx?category=Shoes">Tennis Shoes</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx?category=Shoes">Squash Shoes</a>
+                                </div>
+
+                                <!-- RACQUET -->
+                                <div class="col-lg-4 mega-col px-lg-3">
+                                    <div class="mega-title">Racquet</div>
+
+                                    <!-- Filter by ProductCategory=Rackets -->
+                                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx?category=Rackets">Badminton Racquets</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx?category=Rackets">Tennis Racquets</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx?category=Rackets">Squash Racquets</a>
+                                </div>
+
+                            </div>
+                        </div>
                     </li>
 
-                    <!-- DROPDOWN -->
+                    <!-- Normal links -->
+                    <li class="nav-item">
+                        <a class="nav-link" runat="server" href="~/Pages/User/Cart.aspx">Cart</a>
+                    </li>
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle"
                            href="#"
-                           id="navDropdown"
+                           id="aboutDropdown"
                            role="button"
                            data-bs-toggle="dropdown"
                            aria-expanded="false">
                             About Us
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="navDropdown">
+                        <ul class="dropdown-menu" aria-labelledby="aboutDropdown">
                             <li><a class="dropdown-item" href="#">About Us</a></li>
-                            <li><a class="dropdown-item" href="/Pages/User/Faq.aspx">FAQs</a></li>
+                            <li><a class="dropdown-item" runat="server" href="~/Pages/User/Faq.aspx">FAQs</a></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item" href="#">Something else here</a></li>
                         </ul>
                     </li>
 
@@ -85,24 +200,46 @@
                 </ul>
 
                 <!-- SEARCH BAR -->
-                <div class="d-flex me-4" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-                    <button class="btn btn-outline-success" type="button">
+                <div class="d-flex me-3" role="search">
+                    <asp:TextBox ID="txtNavSearch" runat="server"
+                        CssClass="form-control me-2"
+                        placeholder="Search"
+                        ToolTip="Search products"
+                        AutoCompleteType="Disabled" />
+
+                    <asp:LinkButton ID="btnNavSearch" runat="server"
+                        CssClass="btn btn-outline-success"
+                        OnClick="btnNavSearch_Click"
+                        CausesValidation="false">
                         <i class="bi bi-search"></i>
-                    </button>
+                    </asp:LinkButton>
                 </div>
 
-                <!-- PERSON ICON -->
-                <a class="nav-link text-light d-flex align-items-center me-3 ms-3"
-                   runat="server" href="~/Pages/User/Login.aspx">
-                    <i class="bi bi-person fs-2"></i>
-                </a>
+                <!-- RIGHT SIDE ICONS -->
+                <ul class="navbar-nav mb-0 align-items-center">
 
-                <!--Cart Icon-->
-                <a class="nav-link text-light me-3" 
-                   runat="server" href="~/Pages/User/Cart.aspx">
-                    <i class="bi bi-cart fs-3"></i>
-                </a>
+                    <!-- PERSON ICON (Login link) -->
+                    <li class="nav-item">
+                        <a class="nav-link text-light d-flex align-items-center"
+                           runat="server" href="~/Pages/User/Login.aspx" title="Login">
+                            <i class="bi bi-person fs-2"></i>
+                        </a>
+                    </li>
+
+                    <!-- CART ICON (badge count) -->
+                    <li class="nav-item">
+                        <a class="nav-link text-light d-flex align-items-center position-relative"
+                           runat="server" href="~/Pages/User/Cart.aspx">
+                            <i class="bi bi-cart fs-3"></i>
+
+                            <asp:Label ID="lblCartCount" runat="server"
+                                CssClass="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                Style="font-size:.70rem; display:none;">
+                            </asp:Label>
+                        </a>
+                    </li>
+
+                </ul>
 
             </div>
         </div>
@@ -119,7 +256,6 @@
 
 </form>
 
-<!-- Bootstrap 5 JS (REQUIRED for dropdown + toggle) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>

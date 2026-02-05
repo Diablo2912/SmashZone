@@ -6,7 +6,7 @@ using SmashZone.App_Code;
 
 namespace SmashZone.Pages.User
 {
-    public partial class Products : BasePage
+    public partial class badmintonProducts : BasePage
     {
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -18,8 +18,7 @@ namespace SmashZone.Pages.User
 
         private void LoadProducts()
         {
-            string connStr =
-                ConfigurationManager.ConnectionStrings["SmashZoneCS"].ConnectionString;
+            string connStr = ConfigurationManager.ConnectionStrings["SmashZoneCS"].ConnectionString;
 
             // Querystring filters
             string category = Request.QueryString["category"];
@@ -27,7 +26,6 @@ namespace SmashZone.Pages.User
 
             // Safe ORDER BY
             string orderBy = "ProductTitle ASC";
-
             switch (sort)
             {
                 case "price_asc":
@@ -46,15 +44,15 @@ namespace SmashZone.Pages.User
             }
 
             string sql = $@"
-                SELECT
-                    Id,
-                    ProductTitle,
-                    ProductImage,
-                    ProductPrice
-                FROM Products
-                WHERE (@Category IS NULL OR ProductCategory = @Category)
-                ORDER BY {orderBy};
-            ";
+SELECT
+    Id,
+    ProductTitle,
+    ProductImage,
+    ProductPrice
+FROM dbo.Badminton_Products
+WHERE (@Category IS NULL OR ProductCategory = @Category)
+ORDER BY {orderBy};
+";
 
             DataTable dt = new DataTable();
 
@@ -74,18 +72,14 @@ namespace SmashZone.Pages.User
                     }
                 }
 
-                // Bind Repeater
                 rptProducts.DataSource = dt;
                 rptProducts.DataBind();
 
-                // Product count
                 lblProductCount.Text = dt.Rows.Count.ToString();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 lblProductCount.Text = "0";
-                // Optional debug:
-                // lblError.Text = ex.Message;
             }
         }
     }

@@ -11,7 +11,7 @@ namespace SmashZone.Pages.User
 {
 
 
-    public partial class Products
+    public partial class badmintonProducts
     {
 
         /// <summary>
