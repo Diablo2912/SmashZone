@@ -46,9 +46,11 @@ namespace SmashZone.Pages.Admin
 
             LoadKPIs();
             LoadTrend(from, to);
+            LoadPopularProductsThisMonth(); // ✅ Popular Products Bar Chart
             LoadRecentTransactions();
         }
 
+        // ------------------- KPI -------------------
         private void LoadKPIs()
         {
             var today = DateTime.Today;
@@ -80,7 +82,6 @@ namespace SmashZone.Pages.Admin
             {
                 conn.Open();
 
-                // Change CreatedAt if your column name differs
                 cmd.CommandText = @"
 SELECT
     ISNULL(SUM(AmountTotal), 0) AS TotalSales,
@@ -106,6 +107,7 @@ WHERE Status = 'paid'
             return (0m, 0);
         }
 
+        // ------------------- Trend -------------------
         private void LoadTrend(DateTime from, DateTime to)
         {
             var labels = new List<string>();
@@ -153,6 +155,59 @@ ORDER BY [Day];";
             hfData.Value = js.Serialize(data);
         }
 
+        // ------------------- Popular Products (This Month) -------------------
+        // X axis = ProductName, Y axis = UnitsSold (sum of qty from ItemsJson)
+        private void LoadPopularProductsThisMonth()
+        {
+            DateTime start = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            DateTime end = start.AddMonths(1).AddDays(-1);
+
+            lblMonth.Text = start.ToString("MMM yyyy");
+
+            var labels = new List<string>();
+            var data = new List<int>();
+
+            using (var conn = new SqlConnection(ConnStr))
+            using (var cmd = conn.CreateCommand())
+            {
+                conn.Open();
+
+                cmd.CommandText = @"
+SELECT TOP 10
+    j.[name] AS ProductName,
+    SUM(j.[qty]) AS UnitsSold
+FROM dbo.Transactions t
+CROSS APPLY OPENJSON(t.ItemsJson)
+WITH (
+    [name]  nvarchar(200) '$.name',
+    [qty]   int           '$.qty'
+) AS j
+WHERE t.Status = 'paid'
+  AND t.ItemsJson IS NOT NULL
+  AND ISJSON(t.ItemsJson) = 1
+  AND CAST(t.CreatedAt AS date) BETWEEN @start AND @end
+GROUP BY j.[name]
+ORDER BY UnitsSold DESC;";
+
+                cmd.Parameters.AddWithValue("@start", start.Date);
+                cmd.Parameters.AddWithValue("@end", end.Date);
+
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        labels.Add(Convert.ToString(rdr["ProductName"])); // ✅ X axis
+                        data.Add(Convert.ToInt32(rdr["UnitsSold"]));      // ✅ Y axis
+                    }
+                }
+            }
+
+            var js = new JavaScriptSerializer();
+            hfPopLabels.Value = js.Serialize(labels);
+            hfPopData.Value = js.Serialize(data);
+        }
+
+        // ------------------- Recent -------------------
         private void LoadRecentTransactions()
         {
             using (var conn = new SqlConnection(ConnStr))
@@ -189,6 +244,7 @@ ORDER BY CreatedAt DESC;";
             }
         }
 
+        // ------------------- Auth / Utils -------------------
         private bool IsAdmin()
         {
             return Session["Role"] != null &&

@@ -11,7 +11,7 @@ namespace SmashZone.Pages.User
         {
             if (!IsPostBack)
             {
-                // 1) Validate id
+                // 1) Validate id (this id is your All_Products.Id)
                 string idStr = Request.QueryString["id"];
                 if (!int.TryParse(idStr, out int id) || id <= 0)
                 {
@@ -35,7 +35,6 @@ namespace SmashZone.Pages.User
         // ================= LOGIN CHECK =================
         private bool IsUserLoggedIn()
         {
-            // Change this if your login uses different session key
             return Session["AccountId"] != null;
         }
 
@@ -56,6 +55,9 @@ namespace SmashZone.Pages.User
 
             try
             {
+                // IMPORTANT:
+                // Product.GetById(id) should return from All_Products, including:
+                // p.Sport, p.SourceTable, p.SourceProductId
                 p = Product.GetById(id);
             }
             catch (Exception ex)
@@ -104,6 +106,17 @@ namespace SmashZone.Pages.User
                 stockDot.Attributes["class"] = "dot dot-red";
             }
 
+            // ================= NEW: STORE MAPPING FOR CHECKOUT (FIX A) =================
+            // You NEED these for Stripe metadata + stock deduction later.
+            // Add these hidden fields in your .aspx:
+            // <asp:HiddenField ID="hfSport" runat="server" />
+            // <asp:HiddenField ID="hfSourceTable" runat="server" />
+            // <asp:HiddenField ID="hfSourceProductId" runat="server" />
+            hfSport.Value = p.Sport ?? "";
+            hfSourceTable.Value = p.SourceTable ?? "";
+            hfSourceProductId.Value = (p.SourceProductId <= 0) ? "" : p.SourceProductId.ToString();
+
+            // Safety check: if mapping missing, still allow viewing, but adding to cart will fail cleanly
             lblMsg.Text = "";
         }
 
@@ -123,7 +136,7 @@ namespace SmashZone.Pages.User
             if (!EnsureLoggedIn("add items to your cart"))
                 return;
 
-            int id = int.Parse(hfId.Value);
+            int allProductsId = int.Parse(hfId.Value);
             string title = lblTitle.Text;
             string image = hfImage.Value;
 
@@ -135,23 +148,58 @@ namespace SmashZone.Pages.User
             string priceText = (lblPrice.Text ?? "").Replace("$", "").Trim();
             decimal.TryParse(priceText, NumberStyles.Any, CultureInfo.InvariantCulture, out price);
 
+            // ================= NEW: MAPPING DATA (FIX A) =================
+            string sport = (hfSport.Value ?? "").Trim();
+            string sourceTable = (hfSourceTable.Value ?? "").Trim();
+            int sourceProductId = 0;
+            int.TryParse((hfSourceProductId.Value ?? "").Trim(), out sourceProductId);
+
+            if (string.IsNullOrWhiteSpace(sourceTable) || sourceProductId <= 0)
+            {
+                lblMsg.ForeColor = System.Drawing.Color.Red;
+                lblMsg.Text = "❌ This product is missing mapping (SourceTable/SourceProductId). Cannot checkout.";
+                return;
+            }
+
+            // ================= CART DATATABLE =================
+            // We store BOTH:
+            // - AllProductsId (for display/ratings/etc.)
+            // - SourceTable + SourceProductId (for Stripe metadata + stock deduction)
             DataTable cart = Session["Cart"] as DataTable;
 
             if (cart == null)
             {
                 cart = new DataTable();
-                cart.Columns.Add("Id", typeof(int));
+
+                cart.Columns.Add("AllProductsId", typeof(int));
+                cart.Columns.Add("SourceTable", typeof(string));
+                cart.Columns.Add("SourceProductId", typeof(int));
+                cart.Columns.Add("Sport", typeof(string));
+
                 cart.Columns.Add("Title", typeof(string));
                 cart.Columns.Add("Image", typeof(string));
                 cart.Columns.Add("Qty", typeof(int));
                 cart.Columns.Add("Price", typeof(decimal));
+
                 Session["Cart"] = cart;
             }
+            else
+            {
+                // If your cart already exists from old code, ensure new columns exist
+                EnsureCartColumn(cart, "AllProductsId", typeof(int));
+                EnsureCartColumn(cart, "SourceTable", typeof(string));
+                EnsureCartColumn(cart, "SourceProductId", typeof(int));
+                EnsureCartColumn(cart, "Sport", typeof(string));
+            }
 
+            // Merge by SourceTable + SourceProductId (best unique key)
             DataRow existing = null;
             foreach (DataRow r in cart.Rows)
             {
-                if ((int)r["Id"] == id)
+                string rTbl = (r["SourceTable"] == DBNull.Value) ? "" : r["SourceTable"].ToString();
+                int rPid = (r["SourceProductId"] == DBNull.Value) ? 0 : Convert.ToInt32(r["SourceProductId"]);
+
+                if (string.Equals(rTbl, sourceTable, StringComparison.OrdinalIgnoreCase) && rPid == sourceProductId)
                 {
                     existing = r;
                     break;
@@ -160,13 +208,23 @@ namespace SmashZone.Pages.User
 
             if (existing != null)
             {
-                existing["Qty"] = (int)existing["Qty"] + qty;
+                existing["Qty"] = Convert.ToInt32(existing["Qty"]) + qty;
                 existing["Price"] = price;
+
+                // keep these consistent
+                existing["Title"] = title;
+                existing["Image"] = image;
+                existing["Sport"] = sport;
+                existing["AllProductsId"] = allProductsId;
             }
             else
             {
                 var row = cart.NewRow();
-                row["Id"] = id;
+                row["AllProductsId"] = allProductsId;
+                row["SourceTable"] = sourceTable;
+                row["SourceProductId"] = sourceProductId;
+                row["Sport"] = sport;
+
                 row["Title"] = title;
                 row["Image"] = image;
                 row["Qty"] = qty;
@@ -176,6 +234,12 @@ namespace SmashZone.Pages.User
 
             lblMsg.ForeColor = System.Drawing.Color.Green;
             lblMsg.Text = "✅ Added to cart!";
+        }
+
+        private void EnsureCartColumn(DataTable cart, string colName, Type type)
+        {
+            if (!cart.Columns.Contains(colName))
+                cart.Columns.Add(colName, type);
         }
 
         // ================= WISHLIST =================

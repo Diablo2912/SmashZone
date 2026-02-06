@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Globalization;
@@ -7,22 +8,18 @@ using Stripe.Checkout;
 
 namespace SmashZone.Pages.User
 {
-    public partial class checkout : System.Web.UI.Page
+    public partial class checkout : SmashZone.BasePage
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack)
-                BindSummary();
+            if (!IsPostBack) BindSummary();
         }
 
-        // ================= ORDER SUMMARY =================
         private void BindSummary()
         {
             var cart = Session["Cart"] as DataTable;
-
             if (cart == null || cart.Rows.Count == 0)
             {
-                // No cart -> redirect
                 Response.Redirect("~/Pages/User/Cart.aspx");
                 return;
             }
@@ -32,127 +29,102 @@ namespace SmashZone.Pages.User
 
             decimal total = 0m;
             foreach (DataRow r in cart.Rows)
-            {
-                decimal price = Convert.ToDecimal(r["Price"], CultureInfo.InvariantCulture);
-                int qty = Convert.ToInt32(r["Qty"]);
-                total += price * qty;
-            }
+                total += Convert.ToDecimal(r["Price"]) * Convert.ToInt32(r["Qty"]);
 
             lblTotal.Text = total.ToString("0.00", CultureInfo.InvariantCulture);
         }
 
-        // ================= PAY BUTTON =================
         protected void btnPay_Click(object sender, EventArgs e)
         {
-            pnlErr.Visible = false;
-            lblErr.Text = "";
-
             try
             {
+                pnlErr.Visible = false;
+                lblErr.Text = "";
+
                 var cart = Session["Cart"] as DataTable;
                 if (cart == null || cart.Rows.Count == 0)
                 {
-                    ShowErr("Your cart is empty.");
+                    pnlErr.Visible = true;
+                    lblErr.Text = "Cart is empty.";
                     return;
                 }
 
-                // Load Stripe secret key
+                // Stripe key
                 string secretKey = ConfigurationManager.AppSettings["StripeSecretKey"];
                 if (string.IsNullOrWhiteSpace(secretKey))
-                {
-                    ShowErr("StripeSecretKey missing in web.config.");
-                    return;
-                }
+                    throw new Exception("StripeSecretKey missing in Web.config AppSettings.");
 
                 StripeConfiguration.ApiKey = secretKey;
 
-                // ================= URLs =================
+                // Build absolute domain (works for localhost too)
                 string baseUrl = Request.Url.GetLeftPart(UriPartial.Authority);
 
-                // ✅ REQUIRED: session_id token
-                string successUrl = baseUrl +
-                    ResolveUrl("~/Pages/User/checkoutSuccess.aspx") +
-                    "?session_id={CHECKOUT_SESSION_ID}";
-
-                string cancelUrl = baseUrl +
-                    ResolveUrl("~/Pages/User/checkout_cancel.aspx");
-
-                // ================= LINE ITEMS =================
-                var lineItems = new System.Collections.Generic.List<SessionLineItemOptions>();
+                // Build line items
+                var lineItems = new List<SessionLineItemOptions>();
 
                 foreach (DataRow r in cart.Rows)
                 {
-                    string title = Convert.ToString(r["Title"]);
-                    string image = Convert.ToString(r["Image"]);
-                    decimal price = Convert.ToDecimal(r["Price"], CultureInfo.InvariantCulture);
+                    string title = r["Title"]?.ToString() ?? "Item";
                     int qty = Convert.ToInt32(r["Qty"]);
+                    decimal price = Convert.ToDecimal(r["Price"]); // in SGD dollars
 
-                    long unitAmount = (long)Math.Round(
-                        price * 100m,
-                        0,
-                        MidpointRounding.AwayFromZero
-                    );
+                    // mapping
+                    string sport = r.Table.Columns.Contains("Sport") ? (r["Sport"]?.ToString() ?? "") : "";
+                    string sourceTable = r.Table.Columns.Contains("SourceTable") ? (r["SourceTable"]?.ToString() ?? "") : "";
+                    int sourceProductId = r.Table.Columns.Contains("SourceProductId") ? Convert.ToInt32(r["SourceProductId"]) : 0;
 
-                    var item = new SessionLineItemOptions
+                    if (string.IsNullOrWhiteSpace(sourceTable) || sourceProductId <= 0)
+                        throw new Exception($"Missing mapping for '{title}' (SourceTable/SourceProductId).");
+
+                    long unitAmountCents = (long)Math.Round(price * 100m, 0);
+
+                    lineItems.Add(new SessionLineItemOptions
                     {
                         Quantity = qty,
                         PriceData = new SessionLineItemPriceDataOptions
                         {
                             Currency = "sgd",
-                            UnitAmount = unitAmount,
+                            UnitAmount = unitAmountCents,
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
                                 Name = title,
-                                Images = string.IsNullOrWhiteSpace(image)
-                                    ? null
-                                    : new System.Collections.Generic.List<string>
-                                    {
-                                        baseUrl + ResolveUrl("~/" + image)
-                                    }
+                                Metadata = new Dictionary<string, string>
+                                {
+                                    { "sport", sport ?? "" },
+                                    { "sourceTable", sourceTable },
+                                    { "sourceProductId", sourceProductId.ToString() }
+                                }
                             }
                         }
-                    };
-
-                    lineItems.Add(item);
+                    });
                 }
 
-                // ================= CREATE CHECKOUT SESSION =================
                 var options = new SessionCreateOptions
                 {
                     Mode = "payment",
-                    PaymentMethodTypes = new System.Collections.Generic.List<string> { "card" },
+                    PaymentMethodTypes = new List<string> { "card" },
+
                     LineItems = lineItems,
-                    SuccessUrl = successUrl,
-                    CancelUrl = cancelUrl,
 
-                    // ✅ Enable promo code entry on Stripe Checkout page
-                    AllowPromotionCodes = true,
+                    SuccessUrl = baseUrl + "/Pages/User/checkoutSuccess.aspx?session_id={CHECKOUT_SESSION_ID}",
+                    CancelUrl = baseUrl + "/Pages/User/Cart.aspx",
 
-                    // ✅ Pass logged-in email to Stripe (for receipt + success page)
-                    CustomerEmail = Session["Email"]?.ToString()
+                    // Optional: helps you link to your user
+                    ClientReferenceId = (Session["AccountId"] != null) ? Session["AccountId"].ToString() : null
                 };
 
                 var service = new SessionService();
                 Session stripeSession = service.Create(options);
 
-                // Redirect to Stripe Checkout
+                // Redirect user to Stripe Checkout
                 Response.Redirect(stripeSession.Url, false);
-            }
-            catch (StripeException se)
-            {
-                ShowErr("Stripe error: " + Server.HtmlEncode(se.Message));
+                Context.ApplicationInstance.CompleteRequest();
             }
             catch (Exception ex)
             {
-                ShowErr("Server error: " + Server.HtmlEncode(ex.Message));
+                pnlErr.Visible = true;
+                lblErr.Text = "❌ " + Server.HtmlEncode(ex.Message);
             }
-        }
-
-        // ================= ERROR UI =================
-        private void ShowErr(string msg)
-        {
-            pnlErr.Visible = true;
-            lblErr.Text = msg;
         }
     }
 }

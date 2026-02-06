@@ -1,11 +1,20 @@
-﻿using System;
+﻿// ======================= checkoutSuccess.aspx.cs (FULL CODE) =======================
+// This version:
+// ✅ saves transaction (with ItemsJson + TotalQty)
+// ✅ deducts stock from the correct sport table + All_Products
+// ✅ prevents double-deduction using Transactions.StockDeducted (idempotent)
+// ✅ uses Stripe Product Metadata: sport, sourceTable, sourceProductId
+
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Globalization;
+using System.Web.Script.Serialization;
 using Stripe;
 using Stripe.Checkout;
 using SmashZone.App_Code;
+using StripeProduct = Stripe.Product;
 
 namespace SmashZone.Pages.User
 {
@@ -42,7 +51,13 @@ namespace SmashZone.Pages.User
                 var service = new SessionService();
                 var session = service.Get(sessionId, new SessionGetOptions
                 {
-                    Expand = new List<string> { "payment_intent", "line_items" }
+                    Expand = new List<string>
+                    {
+                        "payment_intent",
+                        "line_items",
+                        "line_items.data.price",
+                        "line_items.data.price.product" // ✅ get Product + Metadata(sport/sourceTable/sourceProductId)
+                    }
                 });
 
                 // ================= PAYMENT CHECK =================
@@ -60,7 +75,6 @@ namespace SmashZone.Pages.User
 
                 // ================= RECEIPT =================
                 string receiptUrl = "";
-
                 if (!string.IsNullOrWhiteSpace(session.PaymentIntentId))
                 {
                     var chargeService = new ChargeService();
@@ -79,8 +93,17 @@ namespace SmashZone.Pages.User
                     ? "Receipt unavailable"
                     : "Open Stripe receipt";
 
+                // ================= BUILD ITEMS (JSON + LIST) =================
+                var built = BuildItemsJson(session);
+                string itemsJson = built.itemsJson;
+                int totalQty = built.totalQty;
+                List<TxItem> items = built.items;
+
                 // ================= SAVE TO DB =================
-                SaveTransaction(session, total, receiptUrl);
+                SaveTransaction(session, total, receiptUrl, itemsJson, totalQty);
+
+                // ================= STOCK DEDUCTION (ONCE) =================
+                DeductStockOnce(session.Id, items);
 
                 // ================= EMAIL =================
                 string email = session.CustomerDetails?.Email;
@@ -118,14 +141,92 @@ namespace SmashZone.Pages.User
             }
         }
 
+        // ========= item structure stored into Transactions.ItemsJson =========
+        private class TxItem
+        {
+            public string name { get; set; }
+            public string sport { get; set; }
+            public int qty { get; set; }
+
+            // ✅ NEW: exact mapping so we deduct correctly
+            public string sourceTable { get; set; }     // e.g. "Badminton_Products"
+            public int sourceProductId { get; set; }    // e.g. 12
+        }
+
+        // ========= build items json + items list from Stripe line items =========
+        private (string itemsJson, int totalQty, List<TxItem> items) BuildItemsJson(Session session)
+        {
+            var items = new List<TxItem>();
+            int totalQty = 0;
+
+            if (session.LineItems?.Data != null)
+            {
+                foreach (var li in session.LineItems.Data)
+                {
+                    int qty = (int)(li.Quantity ?? 1);
+                    totalQty += qty;
+
+                    string name = li.Description ?? "Item";
+                    string sport = "";
+                    string sourceTable = "";
+                    int sourceProductId = 0;
+
+                    var product = li.Price?.Product as StripeProduct;
+                    if (product != null)
+                    {
+                        if (!string.IsNullOrWhiteSpace(product.Name))
+                            name = product.Name;
+
+                        if (product.Metadata != null)
+                        {
+                            if (product.Metadata.ContainsKey("sport"))
+                                sport = product.Metadata["sport"];
+
+                            // ✅ product mapping metadata
+                            if (product.Metadata.ContainsKey("sourceTable"))
+                                sourceTable = product.Metadata["sourceTable"];
+
+                            if (product.Metadata.ContainsKey("sourceProductId"))
+                                int.TryParse(product.Metadata["sourceProductId"], out sourceProductId);
+                        }
+                    }
+
+                    // fallback guess if no sport metadata
+                    if (string.IsNullOrWhiteSpace(sport))
+                    {
+                        string lower = (name ?? "").ToLowerInvariant();
+                        if (lower.Contains("badminton")) sport = "Badminton";
+                        else if (lower.Contains("tennis")) sport = "Tennis";
+                        else if (lower.Contains("squash")) sport = "Squash";
+                        else sport = "Unknown";
+                    }
+
+                    items.Add(new TxItem
+                    {
+                        name = name,
+                        sport = sport,
+                        qty = qty,
+                        sourceTable = sourceTable,
+                        sourceProductId = sourceProductId
+                    });
+                }
+            }
+
+            var js = new JavaScriptSerializer();
+            return (js.Serialize(items), totalQty, items);
+        }
+
         // ================= SAVE TRANSACTION =================
-        private void SaveTransaction(Session session, decimal total, string receiptUrl)
+        // Requires DB columns:
+        //   ItemsJson NVARCHAR(MAX) NULL
+        //   TotalQty  INT NOT NULL DEFAULT(0)
+        //   StockDeducted BIT NOT NULL DEFAULT(0)
+        private void SaveTransaction(Session session, decimal total, string receiptUrl, string itemsJson, int totalQty)
         {
             if (Session["AccountId"] == null)
                 return;
 
             int accountId = Convert.ToInt32(Session["AccountId"]);
-
             string connStr = ConfigurationManager.ConnectionStrings["SmashZoneCS"].ConnectionString;
 
             using (SqlConnection conn = new SqlConnection(connStr))
@@ -136,9 +237,20 @@ namespace SmashZone.Pages.User
 IF NOT EXISTS (SELECT 1 FROM dbo.Transactions WHERE StripeSessionId = @StripeSessionId)
 BEGIN
     INSERT INTO dbo.Transactions
-    (AccountId, StripeSessionId, PaymentIntentId, ReceiptUrl, Currency, AmountTotal, Status)
+    (AccountId, StripeSessionId, PaymentIntentId, ReceiptUrl, Currency, AmountTotal, Status, ItemsJson, TotalQty, StockDeducted)
     VALUES
-    (@AccountId, @StripeSessionId, @PaymentIntentId, @ReceiptUrl, @Currency, @AmountTotal, @Status)
+    (@AccountId, @StripeSessionId, @PaymentIntentId, @ReceiptUrl, @Currency, @AmountTotal, @Status, @ItemsJson, @TotalQty, 0)
+END
+ELSE
+BEGIN
+    UPDATE dbo.Transactions
+    SET ReceiptUrl = @ReceiptUrl,
+        PaymentIntentId = @PaymentIntentId,
+        Status = @Status,
+        AmountTotal = @AmountTotal,
+        ItemsJson = @ItemsJson,
+        TotalQty = @TotalQty
+    WHERE StripeSessionId = @StripeSessionId;
 END";
 
                 using (SqlCommand cmd = new SqlCommand(sql, conn))
@@ -152,8 +264,135 @@ END";
                     cmd.Parameters.AddWithValue("@Currency", session.Currency ?? "sgd");
                     cmd.Parameters.AddWithValue("@AmountTotal", total);
                     cmd.Parameters.AddWithValue("@Status", session.PaymentStatus ?? "unknown");
+                    cmd.Parameters.AddWithValue("@ItemsJson", (object)itemsJson ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@TotalQty", totalQty);
 
                     cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // ================= STOCK DEDUCTION (ONCE) =================
+        private void DeductStockOnce(string stripeSessionId, List<TxItem> items)
+        {
+            if (items == null || items.Count == 0) return;
+
+            string connStr = ConfigurationManager.ConnectionStrings["SmashZoneCS"].ConnectionString;
+
+            using (var conn = new SqlConnection(connStr))
+            {
+                conn.Open();
+                using (var tx = conn.BeginTransaction())
+                {
+                    // Lock transaction row so refresh/back won't double deduct
+                    bool alreadyDeducted;
+                    using (var lockCmd = new SqlCommand(@"
+SELECT StockDeducted
+FROM dbo.Transactions WITH (UPDLOCK, HOLDLOCK)
+WHERE StripeSessionId = @sid;", conn, tx))
+                    {
+                        lockCmd.Parameters.AddWithValue("@sid", stripeSessionId);
+                        object val = lockCmd.ExecuteScalar();
+
+                        if (val == null)
+                        {
+                            tx.Rollback();
+                            throw new Exception("Transaction record not found for stock deduction.");
+                        }
+
+                        alreadyDeducted = Convert.ToBoolean(val);
+                    }
+
+                    if (alreadyDeducted)
+                    {
+                        tx.Commit();
+                        return;
+                    }
+
+                    // whitelist tables (avoid SQL injection)
+                    var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        "Badminton_Products",
+                        "Tennis_Products",
+                        "Squash_Products"
+                    };
+
+                    foreach (var it in items)
+                    {
+                        if (it.qty <= 0) continue;
+
+                        if (string.IsNullOrWhiteSpace(it.sourceTable) || it.sourceProductId <= 0)
+                        {
+                            tx.Rollback();
+                            throw new Exception($"Missing product mapping for '{it.name}'. (sourceTable/sourceProductId not found)");
+                        }
+
+                        if (!allowed.Contains(it.sourceTable))
+                        {
+                            tx.Rollback();
+                            throw new Exception("Invalid source table detected.");
+                        }
+
+                        // get current stock with lock
+                        int currentStock;
+                        using (var getStockCmd = new SqlCommand($@"
+SELECT ProductStock
+FROM dbo.[{it.sourceTable}] WITH (UPDLOCK, ROWLOCK)
+WHERE Id = @pid;", conn, tx))
+                        {
+                            getStockCmd.Parameters.AddWithValue("@pid", it.sourceProductId);
+                            object s = getStockCmd.ExecuteScalar();
+
+                            if (s == null)
+                            {
+                                tx.Rollback();
+                                throw new Exception($"Product not found in {it.sourceTable} (Id={it.sourceProductId}).");
+                            }
+
+                            currentStock = Convert.ToInt32(s);
+                        }
+
+                        if (currentStock < it.qty)
+                        {
+                            tx.Rollback();
+                            throw new Exception($"Not enough stock for '{it.name}'. Remaining: {currentStock}, needed: {it.qty}");
+                        }
+
+                        // deduct from sport table
+                        using (var updCmd = new SqlCommand($@"
+UPDATE dbo.[{it.sourceTable}]
+SET ProductStock = ProductStock - @qty
+WHERE Id = @pid;", conn, tx))
+                        {
+                            updCmd.Parameters.AddWithValue("@qty", it.qty);
+                            updCmd.Parameters.AddWithValue("@pid", it.sourceProductId);
+                            updCmd.ExecuteNonQuery();
+                        }
+
+                        // also keep All_Products in sync
+                        using (var updAll = new SqlCommand(@"
+UPDATE dbo.All_Products
+SET ProductStock = ProductStock - @qty
+WHERE SourceTable = @tbl AND SourceProductId = @pid;", conn, tx))
+                        {
+                            updAll.Parameters.AddWithValue("@qty", it.qty);
+                            updAll.Parameters.AddWithValue("@tbl", it.sourceTable);
+                            updAll.Parameters.AddWithValue("@pid", it.sourceProductId);
+                            updAll.ExecuteNonQuery();
+                        }
+                    }
+
+                    // mark as deducted
+                    using (var markCmd = new SqlCommand(@"
+UPDATE dbo.Transactions
+SET StockDeducted = 1
+WHERE StripeSessionId = @sid;", conn, tx))
+                    {
+                        markCmd.Parameters.AddWithValue("@sid", stripeSessionId);
+                        markCmd.ExecuteNonQuery();
+                    }
+
+                    tx.Commit();
                 }
             }
         }
@@ -201,96 +440,5 @@ END";
                 : "alert alert-success mt-3";
             lblEmailStatus.Text = msg;
         }
-
-        private void DeductStockFromSession(Session stripeSession)
-        {
-            if (Session["AccountId"] == null) return;
-
-            string connStr = ConfigurationManager.ConnectionStrings["SmashZoneCS"].ConnectionString;
-
-            using (SqlConnection conn = new SqlConnection(connStr))
-            {
-                conn.Open();
-                using (SqlTransaction tx = conn.BeginTransaction())
-                {
-                    // 1) Make sure we haven't deducted stock for this session before
-                    using (SqlCommand checkCmd = new SqlCommand(@"
-SELECT StockDeducted 
-FROM dbo.Transactions 
-WHERE StripeSessionId = @sid;", conn, tx))
-                    {
-                        checkCmd.Parameters.AddWithValue("@sid", stripeSession.Id);
-
-                        object val = checkCmd.ExecuteScalar();
-                        if (val != null && val != DBNull.Value && Convert.ToBoolean(val) == true)
-                        {
-                            tx.Commit(); // already done
-                            return;
-                        }
-                    }
-
-                    // 2) Deduct stock for each line item
-                    if (stripeSession.LineItems?.Data != null)
-                    {
-                        foreach (var li in stripeSession.LineItems.Data)
-                        {
-                            int qty = (int)(li.Quantity ?? 1);
-
-                            // ✅ BEST: get ProductId from metadata (see section 3)
-                            int productId = GetProductIdFromLineItem(li, conn, tx);
-
-                            // Deduct with safety check (no negative stock)
-                            using (SqlCommand deductCmd = new SqlCommand(@"
-UPDATE dbo.Products
-SET StockQty = StockQty - @qty
-WHERE ProductId = @pid
-  AND StockQty >= @qty;", conn, tx))
-                            {
-                                deductCmd.Parameters.AddWithValue("@qty", qty);
-                                deductCmd.Parameters.AddWithValue("@pid", productId);
-
-                                int rows = deductCmd.ExecuteNonQuery();
-                                if (rows == 0)
-                                {
-                                    // Not enough stock (or product not found)
-                                    throw new Exception("Insufficient stock for ProductId " + productId);
-                                }
-                            }
-                        }
-                    }
-
-                    // 3) Mark as deducted
-                    using (SqlCommand markCmd = new SqlCommand(@"
-UPDATE dbo.Transactions 
-SET StockDeducted = 1 
-WHERE StripeSessionId = @sid;", conn, tx))
-                    {
-                        markCmd.Parameters.AddWithValue("@sid", stripeSession.Id);
-                        markCmd.ExecuteNonQuery();
-                    }
-
-                    tx.Commit();
-                }
-            }
-        }
-
-        private int GetProductIdFromLineItem(LineItem li, SqlConnection conn, SqlTransaction tx)
-        {
-            // If you don't have metadata yet, you can fallback by matching name/description,
-            // but metadata is MUCH safer.
-            string name = li.Description ?? "";
-
-            using (SqlCommand cmd = new SqlCommand(@"
-SELECT TOP 1 ProductId 
-FROM dbo.Products
-WHERE ProductName = @name;", conn, tx))
-            {
-                cmd.Parameters.AddWithValue("@name", name);
-                object result = cmd.ExecuteScalar();
-                if (result == null) throw new Exception("Product not found: " + name);
-                return Convert.ToInt32(result);
-            }
-        }
-
     }
 }

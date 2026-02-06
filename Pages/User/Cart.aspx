@@ -48,11 +48,12 @@
                             </div>
 
                             <!-- Quantity Controls -->
+                            <!-- Quantity Controls -->
                             <div class="qty-box">
                                 <asp:LinkButton runat="server"
                                     CssClass="qty-btn"
                                     CommandName="dec"
-                                    CommandArgument='<%# Eval("Id") %>'
+                                    CommandArgument='<%# Eval("SourceTable") + "|" + Eval("SourceProductId") %>'
                                     CausesValidation="false"
                                     ToolTip="Decrease">
                                     <i class="bi bi-dash"></i>
@@ -63,7 +64,7 @@
                                 <asp:LinkButton runat="server"
                                     CssClass="qty-btn"
                                     CommandName="inc"
-                                    CommandArgument='<%# Eval("Id") %>'
+                                    CommandArgument='<%# Eval("SourceTable") + "|" + Eval("SourceProductId") %>'
                                     CausesValidation="false"
                                     ToolTip="Increase">
                                     <i class="bi bi-plus"></i>
@@ -72,11 +73,12 @@
                                 <asp:LinkButton runat="server"
                                     CssClass="btn btn-sm btn-outline-danger ms-2"
                                     CommandName="remove"
-                                    CommandArgument='<%# Eval("Id") %>'
+                                    CommandArgument='<%# Eval("SourceTable") + "|" + Eval("SourceProductId") %>'
                                     CausesValidation="false">
                                     Remove
                                 </asp:LinkButton>
                             </div>
+
                         </div>
 
                         <div class="cart-right">

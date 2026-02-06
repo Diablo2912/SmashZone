@@ -1,5 +1,5 @@
 ﻿<%@ Page Title="Checkout" Language="C#"
-    MasterPageFile="~/Master_Pages/Site.Master"
+    MasterPageFile="~/Master_Pages/UserLogin.Master"
     AutoEventWireup="true"
     CodeBehind="checkout.aspx.cs"
     Inherits="SmashZone.Pages.User.checkout" %>

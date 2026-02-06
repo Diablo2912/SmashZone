@@ -1,25 +1,29 @@
 ﻿using System;
 using System.Data;
 using System.Globalization;
+using System.Web.UI.WebControls;
 
 namespace SmashZone.Pages.User
 {
-    public partial class Cart : System.Web.UI.Page
+    public partial class Cart : SmashZone.BasePage
     {
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
+            {
                 BindCart();
+            }
         }
 
+        // ================= BIND CART =================
         private void BindCart()
         {
             DataTable cart = Session["Cart"] as DataTable;
 
             if (cart == null || cart.Rows.Count == 0)
             {
-                pnlEmpty.Visible = true;
                 pnlCart.Visible = false;
+                pnlEmpty.Visible = true;
                 lblGrandTotal.Text = "0.00";
                 return;
             }
@@ -30,6 +34,7 @@ namespace SmashZone.Pages.User
             rptCart.DataSource = cart;
             rptCart.DataBind();
 
+            // Calculate grand total
             decimal total = 0m;
             foreach (DataRow r in cart.Rows)
             {
@@ -41,69 +46,100 @@ namespace SmashZone.Pages.User
             lblGrandTotal.Text = total.ToString("0.00", CultureInfo.InvariantCulture);
         }
 
-        protected void rptCart_ItemCommand(object source, System.Web.UI.WebControls.RepeaterCommandEventArgs e)
+        // ================= REPEATER COMMANDS =================
+        protected void rptCart_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             DataTable cart = Session["Cart"] as DataTable;
             if (cart == null) return;
 
-            int id = Convert.ToInt32(e.CommandArgument);
+            // CommandArgument format: "Badminton_Products|12"
+            string arg = e.CommandArgument?.ToString() ?? "";
+            string[] parts = arg.Split('|');
+            if (parts.Length != 2) return;
+
+            string sourceTable = parts[0];
+            if (!int.TryParse(parts[1], out int sourceProductId)) return;
 
             DataRow row = null;
             foreach (DataRow r in cart.Rows)
             {
-                if (Convert.ToInt32(r["Id"]) == id)
+                string rTbl = r["SourceTable"]?.ToString() ?? "";
+                int rPid = Convert.ToInt32(r["SourceProductId"]);
+
+                if (string.Equals(rTbl, sourceTable, StringComparison.OrdinalIgnoreCase)
+                    && rPid == sourceProductId)
                 {
                     row = r;
                     break;
                 }
             }
+
             if (row == null) return;
 
-            if (e.CommandName == "remove")
-            {
-                cart.Rows.Remove(row);
-            }
-            else if (e.CommandName == "inc")
-            {
-                int qty = Convert.ToInt32(row["Qty"]);
-                row["Qty"] = qty + 1;
-            }
-            else if (e.CommandName == "dec")
-            {
-                int qty = Convert.ToInt32(row["Qty"]);
-                qty--;
+            int qty = Convert.ToInt32(row["Qty"]);
 
-                // if qty becomes 0, remove it
-                if (qty <= 0)
+            switch (e.CommandName)
+            {
+                case "inc":
+                    row["Qty"] = qty + 1;
+                    break;
+
+                case "dec":
+                    qty--;
+                    if (qty <= 0)
+                        cart.Rows.Remove(row);
+                    else
+                        row["Qty"] = qty;
+                    break;
+
+                case "remove":
                     cart.Rows.Remove(row);
-                else
-                    row["Qty"] = qty;
+                    break;
             }
 
             Session["Cart"] = cart;
             BindCart();
         }
 
+        // ================= CLEAR CART =================
         protected void btnClear_Click(object sender, EventArgs e)
         {
-            Session["Cart"] = null;
+            Session.Remove("Cart");
             BindCart();
         }
 
+        // ================= CHECKOUT =================
         protected void btnCheckout_Click(object sender, EventArgs e)
         {
-            DataTable cart = Session["Cart"] as DataTable;
-
-            if (cart == null || cart.Rows.Count == 0)
+            if (Session["AccountId"] == null)
             {
-                pnlEmpty.Visible = true;
-                pnlCart.Visible = false;
-                lblGrandTotal.Text = "0.00";
+                // redirect to login or show message
+                Response.Redirect("~/Pages/User/Login.aspx?returnUrl=Cart");
                 return;
             }
 
-            // For now: just redirect to a checkout page (create later)
-            // OR you can show a message / do DB insert for order here.
+            DataTable cart = Session["Cart"] as DataTable;
+            if (cart == null || cart.Rows.Count == 0)
+            {
+                BindCart();
+                return;
+            }
+
+            // Final safety check: ensure all rows have mapping
+            foreach (DataRow r in cart.Rows)
+            {
+                string sourceTable = r["SourceTable"]?.ToString();
+                int sourceProductId = Convert.ToInt32(r["SourceProductId"]);
+
+                if (string.IsNullOrWhiteSpace(sourceTable) || sourceProductId <= 0)
+                {
+                    // Mapping broken → block checkout
+                    lblGrandTotal.Text = "0.00";
+                    return;
+                }
+            }
+
+            // Proceed to checkout page (Stripe / order summary)
             Response.Redirect("~/Pages/User/Checkout.aspx");
         }
     }

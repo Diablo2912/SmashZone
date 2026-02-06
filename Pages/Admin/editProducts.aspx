@@ -22,7 +22,7 @@
 
     <asp:Label ID="lblMsg" runat="server"></asp:Label>
 
-    <!-- hidden fields to keep id/table/image -->
+    <!-- hidden fields -->
     <asp:HiddenField ID="hfId" runat="server" />
     <asp:HiddenField ID="hfTable" runat="server" />
     <asp:HiddenField ID="hfOldImage" runat="server" />
@@ -52,7 +52,8 @@
     </div>
 
     <label class="label">Description</label>
-    <asp:TextBox ID="txtDesc" runat="server" CssClass="txt" TextMode="MultiLine" MaxLength="500" />
+    <asp:TextBox ID="txtDesc" runat="server" CssClass="txt"
+        TextMode="MultiLine" MaxLength="500" />
 
     <div class="row" style="margin-top:14px;">
         <div class="col">
@@ -69,10 +70,24 @@
         </div>
     </div>
 
+    <!-- BUTTONS -->
     <div style="margin-top:16px; display:flex; gap:10px;">
-        <asp:Button ID="btnSave" runat="server" Text="Save Changes" CssClass="btn btn-dark" OnClick="btnSave_Click" />
-        <asp:Button ID="btnCancel" runat="server" Text="Cancel" CssClass="btn btn-secondary"
-            CausesValidation="false" OnClick="btnCancel_Click" />
+        <asp:Button ID="btnSave" runat="server"
+            Text="Save Changes"
+            CssClass="btn btn-dark"
+            OnClick="btnSave_Click" />
+
+        <asp:Button ID="btnBack" runat="server"
+            Text="← Back"
+            CssClass="btn btn-outline-secondary"
+            CausesValidation="false"
+            OnClick="btnBack_Click" />
+
+        <asp:Button ID="btnCancel" runat="server"
+            Text="Cancel"
+            CssClass="btn btn-secondary"
+            CausesValidation="false"
+            OnClick="btnCancel_Click" />
     </div>
 </div>
 

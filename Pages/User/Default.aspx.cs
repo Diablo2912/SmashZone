@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Data.SqlClient;
+using System.Web;
 using SmashZone.App_Code;
 
 namespace SmashZone
@@ -11,9 +12,21 @@ namespace SmashZone
         {
             if (!IsPostBack)
             {
+                // Redirect FIRST (no extra work before redirect)
+                string path = VirtualPathUtility.ToAppRelative(Request.Path); // e.g. ~/Pages/User/Default or ~/Pages/User/Default.aspx
+
+                if (path.Equals("~/Pages/User/Default.aspx", StringComparison.OrdinalIgnoreCase) ||
+                    path.Equals("~/Pages/User/Default", StringComparison.OrdinalIgnoreCase))
+                {
+                    Response.RedirectToRoute("RouteHome");
+                    Context.ApplicationInstance.CompleteRequest();
+                    return;
+                }
+
                 LoadFeaturedProducts();
             }
         }
+
 
         private void LoadFeaturedProducts()
         {

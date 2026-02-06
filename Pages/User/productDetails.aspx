@@ -234,6 +234,9 @@
             <asp:HiddenField ID="hfId" runat="server" />
             <asp:HiddenField ID="hfTable" runat="server" />
             <asp:HiddenField ID="hfImage" runat="server" />
+            <asp:HiddenField ID="hfSport" runat="server" />
+            <asp:HiddenField ID="hfSourceTable" runat="server" />
+            <asp:HiddenField ID="hfSourceProductId" runat="server" />
 
         </div>
     </div>

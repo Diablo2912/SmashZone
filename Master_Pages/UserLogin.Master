@@ -1,4 +1,4 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="SmashZone.SiteMaster" %>
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="UserLogin.master.cs" Inherits="SmashZone.SiteMaster" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -40,50 +40,45 @@
         }
 
         /* ================= MEGA MENU ================= */
-.mega-dropdown .dropdown-menu {
-    width: min(950px, 96vw);
-    padding: 22px 22px;
-    border-radius: 14px;
-    border: 1px solid rgba(0,0,0,.08);
-    box-shadow: 0 18px 40px rgba(0,0,0,.15);
-}
+        .mega-dropdown .dropdown-menu {
+            width: min(950px, 96vw);
+            padding: 22px 22px;
+            border-radius: 14px;
+            border: 1px solid rgba(0,0,0,.08);
+            box-shadow: 0 18px 40px rgba(0,0,0,.15);
+        }
+        .mega-title {
+            font-weight: 800;
+            letter-spacing: .02em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-size: .95rem;
+        }
+        .mega-link {
+            display: block;
+            padding: 8px 0;
+            color: #111;
+            text-decoration: none;
+        }
+        .mega-link:hover { text-decoration: underline; }
+        .mega-col + .mega-col { border-left: 1px solid rgba(0,0,0,.08); }
 
-.mega-title {
-    font-weight: 800;
-    letter-spacing: .02em;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    font-size: .95rem;
-}
-
-.mega-link {
-    display: block;
-    padding: 8px 0;
-    color: #111;
-    text-decoration: none;
-}
-
-.mega-link:hover { text-decoration: underline; }
-
-.mega-col + .mega-col { border-left: 1px solid rgba(0,0,0,.08); }
-
-@media (max-width: 991px) {
-    .mega-dropdown .dropdown-menu { width: 100%; padding: 12px; }
-    .mega-col + .mega-col {
-        border-left: none;
-        border-top: 1px solid rgba(0,0,0,.08);
-        margin-top: 12px;
-        padding-top: 12px;
-    }
-}
-
-/* OPTIONAL: hover open on desktop only */
-@media (min-width: 992px) {
-    .mega-dropdown:hover .dropdown-menu { display: block; }
-    .mega-dropdown:hover > .dropdown-toggle { color: #fff; }
-}
-
+        @media (max-width: 991px) {
+            .mega-dropdown .dropdown-menu { width: 100%; padding: 12px; }
+            .mega-col + .mega-col {
+                border-left: none;
+                border-top: 1px solid rgba(0,0,0,.08);
+                margin-top: 12px;
+                padding-top: 12px;
+            }
+        }
+        @media (min-width: 992px) {
+            .mega-dropdown:hover .dropdown-menu { display: block; }
+            .mega-dropdown:hover > .dropdown-toggle { color: #fff; }
+        }
     </style>
+
+    <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>
 </head>
 
 <body>
@@ -117,74 +112,71 @@
                 <!-- LEFT SIDE LINKS -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-    <!-- ✅ MEGA MENU -->
-    <li class="nav-item dropdown mega-dropdown">
-        <a class="nav-link dropdown-toggle"
-           href="#"
-           id="shopDropdown"
-           role="button"
-           data-bs-toggle="dropdown"
-           aria-expanded="false">
-            Shop
-        </a>
+                    <!-- MEGA MENU -->
+                    <li class="nav-item dropdown mega-dropdown">
+                        <a class="nav-link dropdown-toggle"
+                           href="#"
+                           id="shopDropdown"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            Shop
+                        </a>
 
-        <div class="dropdown-menu" aria-labelledby="shopDropdown">
-            <div class="row g-0">
+                        <div class="dropdown-menu" aria-labelledby="shopDropdown">
+                            <div class="row g-0">
 
-                <!-- SPORTS -->
-                <div class="col-lg-4 mega-col px-lg-3">
-                    <div class="mega-title">Sports</div>
-                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx">Badminton</a>
-                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx">Tennis</a>
-                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx">Squash</a>
-                </div>
+                                <!-- SPORTS -->
+                                <div class="col-lg-4 mega-col px-lg-3">
+                                    <div class="mega-title">Sports</div>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx">Badminton</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx">Tennis</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx">Squash</a>
+                                </div>
 
-                <!-- SHOES -->
-                <div class="col-lg-4 mega-col px-lg-3">
-                    <div class="mega-title">Shoes</div>
-                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx?category=Shoes">Badminton Shoes</a>
-                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx?category=Shoes">Tennis Shoes</a>
-                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx?category=Shoes">Squash Shoes</a>
-                </div>
+                                <!-- SHOES -->
+                                <div class="col-lg-4 mega-col px-lg-3">
+                                    <div class="mega-title">Shoes</div>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx?category=Shoes">Badminton Shoes</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx?category=Shoes">Tennis Shoes</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx?category=Shoes">Squash Shoes</a>
+                                </div>
 
-                <!-- RACQUET -->
-                <div class="col-lg-4 mega-col px-lg-3">
-                    <div class="mega-title">Racquet</div>
-                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx?category=Rackets">Badminton Racquets</a>
-                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx?category=Rackets">Tennis Racquets</a>
-                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx?category=Rackets">Squash Racquets</a>
-                </div>
+                                <!-- RACQUET -->
+                                <div class="col-lg-4 mega-col px-lg-3">
+                                    <div class="mega-title">Racquet</div>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx?category=Rackets">Badminton Racquets</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx?category=Rackets">Tennis Racquets</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx?category=Rackets">Squash Racquets</a>
+                                </div>
 
-            </div>
-        </div>
-    </li>
+                            </div>
+                        </div>
+                    </li>
 
-    <!-- ABOUT -->
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle"
-           href="#"
-           id="aboutDropdown"
-           role="button"
-           data-bs-toggle="dropdown"
-           aria-expanded="false">
-            About Us
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="aboutDropdown">
-            <li><a class="dropdown-item" href="#">About Us</a></li>
-            <li><a class="dropdown-item" runat="server" href="~/Pages/User/Faq.aspx">FAQs</a></li>
-            <li><hr class="dropdown-divider" /></li>
-            <li><a class="dropdown-item" href="#">Something else here</a></li>
-        </ul>
-    </li>
+                    <!-- ABOUT -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle"
+                           href="#"
+                           id="aboutDropdown"
+                           role="button"
+                           data-bs-toggle="dropdown"
+                           aria-expanded="false">
+                            About Us
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="aboutDropdown">
+                            <li><a class="dropdown-item" href="#">About Us</a></li>
+                            <li><a class="dropdown-item" runat="server" href="~/Pages/User/Faq.aspx">FAQs</a></li>
+                        </ul>
+                    </li>
 
-    <li class="nav-item">
-        <a class="nav-link" runat="server" href="~/Pages/User/Contact.aspx">Contact</a>
-    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" runat="server" href="~/Pages/User/Contact.aspx">Contact</a>
+                    </li>
 
-</ul>
+                </ul>
 
-
-                <!-- SEARCH BAR -->
+                <!-- SEARCH BAR (ASP.NET so OnClick works) -->
                 <div class="d-flex me-3" role="search">
                     <asp:TextBox ID="txtNavSearch" runat="server"
                         CssClass="form-control me-2"
@@ -221,14 +213,12 @@
                         </ul>
                     </li>
 
-                    <!-- CART ICON (badge count) -->
+                    <!-- CART ICON + BADGE -->
                     <li class="nav-item">
                         <a class="nav-link text-light d-flex align-items-center position-relative"
                            runat="server" href="~/Pages/User/Cart.aspx">
-
                             <i class="bi bi-cart fs-3"></i>
 
-                            <!-- badge -->
                             <asp:Label ID="lblCartCount" runat="server"
                                 CssClass="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                                 Style="font-size:.70rem; display:none;">

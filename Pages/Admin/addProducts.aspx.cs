@@ -47,7 +47,7 @@ namespace SmashZone.Pages.Admin
                 return;
             }
 
-            // Feature for sport tables (if they have Feature column)
+            // IsFeatured for sport tables
             bool feature = false;
 
             // ---------- IMAGE UPLOAD ----------
@@ -82,10 +82,8 @@ namespace SmashZone.Pages.Admin
             // Save file
             fuImage.SaveAs(physicalPath);
 
-            // ✅ THIS is what you store into DB (relative path)
+            // Store relative path in DB
             string imagePathToStore = relativeFolder + fileName;
-
-            // -------------------------------
 
             // sport name for All_Products
             string sport = TableToSport(table);
@@ -98,12 +96,14 @@ namespace SmashZone.Pages.Admin
 
                 try
                 {
-                    // 1) Insert into All_Products
+                    // 1) Insert into All_Products (include SourceTable + SourceProductId)
+                    // IMPORTANT:
+                    // SourceProductId will be the SAME as All_Products.Id (because we force sport table Id = newAllId)
                     string sqlAll = @"
 INSERT INTO dbo.All_Products
-(Sport, ProductTitle, ProductImage, ProductPrice, ProductDescription, ProductStock, ProductCategory)
+(Sport, SourceTable, SourceProductId, ProductTitle, ProductImage, ProductPrice, ProductDescription, ProductStock, ProductCategory)
 VALUES
-(@Sport, @Title, @Image, @Price, @Desc, @Stock, @Category);
+(@Sport, @SourceTable, @SourceProductId, @Title, @Image, @Price, @Desc, @Stock, @Category);
 
 SELECT SCOPE_IDENTITY();";
 
@@ -111,6 +111,11 @@ SELECT SCOPE_IDENTITY();";
                     using (SqlCommand cmdAll = new SqlCommand(sqlAll, conn, tx))
                     {
                         cmdAll.Parameters.AddWithValue("@Sport", sport);
+                        cmdAll.Parameters.AddWithValue("@SourceTable", table);
+
+                        // temporary placeholder; will set after we get newAllId
+                        cmdAll.Parameters.AddWithValue("@SourceProductId", 0);
+
                         cmdAll.Parameters.AddWithValue("@Title", title);
                         cmdAll.Parameters.AddWithValue("@Image", imagePathToStore);
                         cmdAll.Parameters.AddWithValue("@Price", price);
@@ -119,19 +124,25 @@ SELECT SCOPE_IDENTITY();";
                         cmdAll.Parameters.AddWithValue("@Category", category);
 
                         object result = cmdAll.ExecuteScalar();
-                        newAllId = Convert.ToInt32(result); // Id created in All_Products
+                        newAllId = Convert.ToInt32(result);
                     }
 
-                    // 2) Insert into the sport table
-                    // IMPORTANT: keep Id consistent with All_Products so productDetails by Id works
-                    // This requires the sport table "Id" column NOT to be IDENTITY OR you use IDENTITY_INSERT.
-                    // We'll use IDENTITY_INSERT so it works even if sport table Id is IDENTITY.
+                    // 1B) Update SourceProductId = newAllId (now that we know it)
+                    using (SqlCommand cmdUpd = new SqlCommand(@"
+UPDATE dbo.All_Products
+SET SourceProductId = @Id
+WHERE Id = @Id;", conn, tx))
+                    {
+                        cmdUpd.Parameters.AddWithValue("@Id", newAllId);
+                        cmdUpd.ExecuteNonQuery();
+                    }
 
+                    // 2) Insert into sport table using same Id (IDENTITY_INSERT)
                     string sqlSport = $@"
 SET IDENTITY_INSERT dbo.{table} ON;
 
 INSERT INTO dbo.{table}
-(Id, ProductTitle, ProductImage, ProductPrice, ProductDescription, ProductStock, ProductCategory, Feature)
+(Id, ProductTitle, ProductImage, ProductPrice, ProductDescription, ProductStock, ProductCategory, IsFeatured)
 VALUES
 (@Id, @Title, @Image, @Price, @Desc, @Stock, @Category, @Feature);
 
@@ -165,8 +176,8 @@ SET IDENTITY_INSERT dbo.{table} OFF;
                 {
                     tx.Rollback();
 
-                    // Optional: if DB insert fails, consider deleting the uploaded file too
-                    // File.Delete(physicalPath);
+                    // Optional cleanup if insert fails
+                    // try { if (File.Exists(physicalPath)) File.Delete(physicalPath); } catch { }
 
                     ShowMsg("❌ Failed to add product: " + ex.Message, true);
                 }

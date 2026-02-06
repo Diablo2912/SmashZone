@@ -134,6 +134,7 @@
     <Content Include="Images\Product_Img\f42aa6cdcd5c4f4093fa61d3b468fb47.jpeg" />
     <Content Include="Images\Product_Img\fd045bc69394443994b41fa9f8ad5c92.png" />
     <Content Include="Images\running.png" />
+    <Content Include="Images\test1.png" />
     <Content Include="Images\ya11.png" />
     <Content Include="Images\ya77.png" />
     <Content Include="Images\yn1000.png" />
@@ -143,7 +144,6 @@
     <Content Include="Pages\Admin\manageProducts.aspx" />
     <Content Include="Pages\User\2fa.aspx" />
     <Content Include="Pages\User\About.aspx" />
-    <Content Include="Pages\User\aboutUs.aspx" />
     <Content Include="Pages\User\accountDetails.aspx" />
     <Content Include="Pages\User\Cart.aspx" />
     <Content Include="Pages\User\checkout.aspx" />
@@ -305,13 +305,6 @@
       <DependentUpon>About.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Pages\User\aboutUs.aspx.cs">
-      <DependentUpon>aboutUs.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Pages\User\aboutUs.aspx.designer.cs">
-      <DependentUpon>aboutUs.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Pages\User\accountDetails.aspx.cs">
       <DependentUpon>accountDetails.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

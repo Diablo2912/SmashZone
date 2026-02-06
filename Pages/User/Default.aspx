@@ -172,30 +172,30 @@
 
             <div class="sport-card">
                 <div class="card h-100">
-                    <img src="/Images/badminton.png" class="card-img-top" alt="Badminton" />
+                    <img src="/Images/test1.png" class="card-img-top" alt="Badminton" />
                     <div class="card-body text-center">
                         <h6 class="card-title">Badminton</h6>
-                        <a href="Products.aspx?category=Badminton" class="btn btn-sm btn-primary">View</a>
+                        <a href="/Pages/User/badmintonProducts" class="btn btn-sm btn-primary">View</a>
                     </div>
                 </div>
             </div>
 
             <div class="sport-card">
                 <div class="card h-100">
-                    <img src="/Images/squash.jpg" class="card-img-top" alt="Squash" />
+                    <img src="/Images/test2.png" class="card-img-top" alt="Squash" />
                     <div class="card-body text-center">
                         <h6 class="card-title">Squash</h6>
-                        <a href="Products.aspx?category=Squash" class="btn btn-sm btn-primary">View</a>
+                        <a href="/Pages/User/squashProducts.aspx" class="btn btn-sm btn-primary">View</a>
                     </div>
                 </div>
             </div>
 
             <div class="sport-card">
                 <div class="card h-100">
-                    <img src="/Images/tennis.jpg" class="card-img-top" alt="Tennis" />
+                    <img src="/Images/test3.png" class="card-img-top" alt="Tennis" />
                     <div class="card-body text-center">
                         <h6 class="card-title">Tennis</h6>
-                        <a href="Products.aspx?category=Tennis" class="btn btn-sm btn-primary">View</a>
+                        <a href="/Pages/User/tennis Products" class="btn btn-sm btn-primary">View</a>
                     </div>
                 </div>
             </div>
@@ -220,8 +220,19 @@
 
                         <div class="card-body featured-body text-center">
                             <h5 class="featured-title"><%# Eval("ProductTitle") %></h5>
-                            <p class="featured-price">$<%# Eval("ProductPrice", "{0:F2}") %></p>
+
+                            <p class="featured-price mb-3">
+                                $<%# Eval("ProductPrice", "{0:F2}") %>
+                            </p>
+
+                            <a class="btn btn-primary btn-sm"
+                               href='<%# Eval("Id", 
+                                   "~/Pages/User/productDetails.aspx?id={0}&type=" + Eval("ProductType")) %>'
+                               runat="server">
+                                View
+                            </a>
                         </div>
+
 
                     </div>
                 </div>

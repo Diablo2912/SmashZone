@@ -1,67 +1,65 @@
 ﻿using System;
-using System.Data;
+using System.Collections.Generic;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
 namespace SmashZone
 {
-    public partial class SiteMaster : System.Web.UI.MasterPage
+    public partial class SiteMaster : MasterPage
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            // attach once
-            this.Page.PreRender -= SiteMaster_PreRender;
-            this.Page.PreRender += SiteMaster_PreRender;
-        }
+            if (!IsPostBack)
+            {
+                // Only show cart badge if user is logged in
+                bool loggedIn = Session["UserId"] != null;
 
-        private void SiteMaster_PreRender(object sender, EventArgs e)
-        {
-            UpdateCartBadge();
+                var hf = FindControl("hfIsLoggedIn") as HiddenField;
+                if (hf != null) hf.Value = loggedIn ? "1" : "0";
+
+                UpdateCartBadge();
+            }
         }
 
         private void UpdateCartBadge()
         {
-            // ✅ Find the badge only if it exists in THIS master
-            Label badge = FindControl("lblCartCount") as Label;
-            if (badge == null) return;
+            // Cart stored in Session as List<CartItem>
+            var cart = Session["Cart"] as List<CartItem>;
+            int count = 0;
 
-            DataTable cart = Session["Cart"] as DataTable;
-
-            if (cart == null || cart.Rows.Count == 0)
+            if (cart != null)
             {
-                badge.Text = "";
-                badge.Style["display"] = "none";
-                return;
+                foreach (var item in cart)
+                {
+                    count += item.Quantity;
+                }
             }
 
-            int totalQty = 0;
-
-            foreach (DataRow r in cart.Rows)
+            var lbl = FindControl("lblCartCount") as Label;
+            if (lbl != null)
             {
-                int q;
-                if (int.TryParse(Convert.ToString(r["Qty"]), out q))
-                    totalQty += q;
-            }
-
-            if (totalQty <= 0)
-            {
-                badge.Text = "";
-                badge.Style["display"] = "none";
-            }
-            else
-            {
-                badge.Text = totalQty.ToString();
-                badge.Style["display"] = "inline-block";
+                if (count > 0)
+                {
+                    lbl.Text = count.ToString();
+                    lbl.Visible = true;
+                }
+                else
+                {
+                    lbl.Text = "";
+                    lbl.Visible = false;
+                }
             }
         }
+    }
 
-        protected void btnNavSearch_Click(object sender, EventArgs e)
-        {
-            // ✅ Find textbox only if it exists in THIS master
-            TextBox tb = FindControl("txtNavSearch") as TextBox;
-
-            string q = (tb?.Text ?? "").Trim();
-            Response.Redirect("~/Pages/User/Search.aspx?q=" + Server.UrlEncode(q));
-        }
+    // If your project already has this class elsewhere, remove this duplicate.
+    public class CartItem
+    {
+        public int ProductId { get; set; }
+        public string ProductTitle { get; set; }
+        public decimal ProductPrice { get; set; }
+        public int Quantity { get; set; }
+        public string ProductType { get; set; }
+        public string ProductImage { get; set; }
     }
 }

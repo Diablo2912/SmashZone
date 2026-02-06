@@ -159,6 +159,33 @@ namespace SmashZone.Pages.Admin
         protected global::System.Web.UI.WebControls.HiddenField hfData;
 
         /// <summary>
+        /// lblMonth control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblMonth;
+
+        /// <summary>
+        /// hfPopLabels control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfPopLabels;
+
+        /// <summary>
+        /// hfPopData control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfPopData;
+
+        /// <summary>
         /// gvRecent control.
         /// </summary>
         /// <remarks>

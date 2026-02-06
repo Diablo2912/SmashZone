@@ -1,5 +1,5 @@
 ﻿<%@ Page Title="Checkout Success" Language="C#"
-    MasterPageFile="~/Master_Pages/Site.Master"
+    MasterPageFile="~/Master_Pages/UserLogin.Master"
     AutoEventWireup="true"
     CodeBehind="checkoutSuccess.aspx.cs"
     Inherits="SmashZone.Pages.User.checkoutSuccess" %>
@@ -15,7 +15,7 @@
     </style>
 
     <div class="wrap">
-        <h2 class="fw-bold mb-3">Payment Successful ✅</h2>
+        <h2 class="fw-bold mb-3">Payment Successful</h2>
 
         <asp:Panel ID="pnlErr" runat="server" Visible="false" CssClass="alert alert-danger">
             <asp:Label ID="lblErr" runat="server"></asp:Label>

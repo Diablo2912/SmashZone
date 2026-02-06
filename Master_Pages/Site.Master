@@ -63,19 +63,12 @@
             text-decoration: none;
         }
 
-        .mega-link:hover {
-            text-decoration: underline;
-        }
+        .mega-link:hover { text-decoration: underline; }
 
-        .mega-col + .mega-col {
-            border-left: 1px solid rgba(0,0,0,.08);
-        }
+        .mega-col + .mega-col { border-left: 1px solid rgba(0,0,0,.08); }
 
         @media (max-width: 991px) {
-            .mega-dropdown .dropdown-menu {
-                width: 100%;
-                padding: 12px;
-            }
+            .mega-dropdown .dropdown-menu { width: 100%; padding: 12px; }
             .mega-col + .mega-col {
                 border-left: none;
                 border-top: 1px solid rgba(0,0,0,.08);
@@ -107,7 +100,8 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
 
-            <a class="navbar-brand" runat="server" href="~/Pages/User/Default.aspx">SmashZone Sports</a>
+            <!-- Brand -> /Home -->
+            <a class="navbar-brand" runat="server" href="<%$ RouteUrl:RouteName=RouteHome %>">SmashZone Sports</a>
 
             <button class="navbar-toggler" type="button"
                     data-bs-toggle="collapse"
@@ -140,42 +134,32 @@
                                 <!-- SPORTS -->
                                 <div class="col-lg-4 mega-col px-lg-3">
                                     <div class="mega-title">Sports</div>
-
-                                    <!-- Sport pages (no category filter) -->
-                                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx">Badminton</a>
-                                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx">Tennis</a>
-                                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx">Squash</a>
+                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteBadmintonProducts %>">Badminton</a>
+                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteTennisProducts %>">Tennis</a>
+                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteSquashProducts %>">Squash</a>
                                 </div>
 
                                 <!-- SHOES -->
                                 <div class="col-lg-4 mega-col px-lg-3">
                                     <div class="mega-title">Shoes</div>
-
-                                    <!-- Filter by ProductCategory=Shoes -->
-                                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx?category=Shoes">Badminton Shoes</a>
-                                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx?category=Shoes">Tennis Shoes</a>
-                                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx?category=Shoes">Squash Shoes</a>
+                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteBadmintonProducts %>?category=Shoes">Badminton Shoes</a>
+                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteTennisProducts %>?category=Shoes">Tennis Shoes</a>
+                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteSquashProducts %>?category=Shoes">Squash Shoes</a>
                                 </div>
 
                                 <!-- RACQUET -->
                                 <div class="col-lg-4 mega-col px-lg-3">
                                     <div class="mega-title">Racquet</div>
-
-                                    <!-- Filter by ProductCategory=Rackets -->
-                                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx?category=Rackets">Badminton Racquets</a>
-                                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx?category=Rackets">Tennis Racquets</a>
-                                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx?category=Rackets">Squash Racquets</a>
+                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteBadmintonProducts %>?category=Rackets">Badminton Racquets</a>
+                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteTennisProducts %>?category=Rackets">Tennis Racquets</a>
+                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteSquashProducts %>?category=Rackets">Squash Racquets</a>
                                 </div>
 
                             </div>
                         </div>
                     </li>
 
-                    <!-- Normal links -->
-                    <li class="nav-item">
-                        <a class="nav-link" runat="server" href="~/Pages/User/Cart.aspx">Cart</a>
-                    </li>
-
+                    <!-- ABOUT -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle"
                            href="#"
@@ -186,15 +170,14 @@
                             About Us
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="aboutDropdown">
-                            <li><a class="dropdown-item" href="#">About Us</a></li>
-                            <li><a class="dropdown-item" runat="server" href="~/Pages/User/Faq.aspx">FAQs</a></li>
-                            <li><hr class="dropdown-divider" /></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            <li><a class="dropdown-item" runat="server" href="<%$ RouteUrl:RouteName=RouteAbout %>">About Us</a></li>
+                            <li><a class="dropdown-item" runat="server" href="<%$ RouteUrl:RouteName=RouteFaq %>">FAQs</a></li>
                         </ul>
                     </li>
 
+                    <!-- CONTACT -->
                     <li class="nav-item">
-                        <a class="nav-link" runat="server" href="~/Pages/User/Contact.aspx">Contact</a>
+                        <a class="nav-link" runat="server" href="<%$ RouteUrl:RouteName=RouteContact %>">Contact</a>
                     </li>
 
                 </ul>
@@ -218,18 +201,18 @@
                 <!-- RIGHT SIDE ICONS -->
                 <ul class="navbar-nav mb-0 align-items-center">
 
-                    <!-- PERSON ICON (Login link) -->
+                    <!-- LOGIN ICON -->
                     <li class="nav-item">
                         <a class="nav-link text-light d-flex align-items-center"
-                           runat="server" href="~/Pages/User/Login.aspx" title="Login">
+                           runat="server" href="<%$ RouteUrl:RouteName=RouteLogin %>" title="Login">
                             <i class="bi bi-person fs-2"></i>
                         </a>
                     </li>
 
-                    <!-- CART ICON (badge count) -->
+                    <!-- CART ICON -->
                     <li class="nav-item">
                         <a class="nav-link text-light d-flex align-items-center position-relative"
-                           runat="server" href="~/Pages/User/Cart.aspx">
+                           runat="server" href="<%$ RouteUrl:RouteName=RouteCart %>">
                             <i class="bi bi-cart fs-3"></i>
 
                             <asp:Label ID="lblCartCount" runat="server"
