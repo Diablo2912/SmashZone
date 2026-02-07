@@ -5,7 +5,6 @@ using System.Drawing;
 using SmashZone.App_Code;
 using SmashZone.Master_Pages;
 
-
 namespace SmashZone.Pages.User
 {
     public partial class productDetails : SmashZone.BasePage
@@ -17,6 +16,7 @@ namespace SmashZone.Pages.User
             {
                 string idStr = Request.QueryString["id"];
                 int id;
+
                 if (!int.TryParse(idStr, out id) || id <= 0)
                 {
                     ShowError("Invalid product link.");
@@ -57,6 +57,7 @@ namespace SmashZone.Pages.User
                 return;
             }
 
+            // visible info
             lblTitle.Text = p.ProductTitle;
             lblCrumbTitle.Text = p.ProductTitle;
             lblPrice.Text = "$" + p.ProductPrice.ToString("0.00", CultureInfo.InvariantCulture);
@@ -68,12 +69,17 @@ namespace SmashZone.Pages.User
             lblCategory.Text = Server.HtmlEncode(p.ProductCategory ?? "");
             lblSport.Text = Server.HtmlEncode(p.Sport ?? "");
 
+            // image
             hfImage.Value = p.ProductImage ?? "";
-
             imgProduct.ImageUrl = string.IsNullOrWhiteSpace(p.ProductImage)
                 ? ResolveUrl("~/Images/no-image.png")
                 : ResolveUrl("~/" + p.ProductImage);
 
+            // ✅ store correct mapping (IMPORTANT for review eligibility + checkout)
+            hfSourceTable.Value = p.SourceTable ?? "";
+            hfSourceProductId.Value = p.SourceProductId.ToString();
+
+            // stock UI
             if (p.ProductStock > 0)
             {
                 lblStockText.Text = "In stock, ready to ship";
@@ -87,13 +93,12 @@ namespace SmashZone.Pages.User
                 lblStockText.Text = "Out of stock";
                 stockDot.Attributes["class"] = "dot dot-red";
 
-                btnAddToCart.Enabled = false; // ✅ prevent clicking
-                btnAddToCart.CssClass = "btn btn-cart btn-wide disabled"; 
+                btnAddToCart.Enabled = false;
+                btnAddToCart.CssClass = "btn btn-cart btn-wide disabled";
             }
         }
 
-        // ================= ADD TO CART =================
-
+        // ================= CART HELPERS =================
         private DataTable GetOrCreateCart()
         {
             DataTable cart = Session["Cart"] as DataTable;
@@ -114,6 +119,7 @@ namespace SmashZone.Pages.User
             return cart;
         }
 
+        // ================= ADD TO CART =================
         protected void btnAddToCart_Click(object sender, EventArgs e)
         {
             if (!IsUserLoggedIn())
@@ -123,9 +129,9 @@ namespace SmashZone.Pages.User
                 return;
             }
 
-            int productId = int.Parse(hfId.Value);
+            int allProductsId = int.Parse(hfId.Value);
 
-            Product p = Product.GetById(productId);
+            Product p = Product.GetById(allProductsId);
             if (p == null)
             {
                 lblMsg.ForeColor = Color.Red;
@@ -140,23 +146,20 @@ namespace SmashZone.Pages.User
                 return;
             }
 
-            // Map to your DB table name (adjust if your Product already has SourceTable)
-            string sourceTable =
-                string.Equals(p.Sport, "Badminton", StringComparison.OrdinalIgnoreCase) ? "Badminton_Products" :
-                string.Equals(p.Sport, "Tennis", StringComparison.OrdinalIgnoreCase) ? "Tennis_Products" :
-                string.Equals(p.Sport, "Squash", StringComparison.OrdinalIgnoreCase) ? "Squash_Products" :
-                "";
+            // ✅ USE REAL MAPPING FROM All_Products
+            string sourceTable = p.SourceTable;
+            int sourceProductId = p.SourceProductId;
 
-            if (string.IsNullOrWhiteSpace(sourceTable))
+            if (string.IsNullOrWhiteSpace(sourceTable) || sourceProductId <= 0)
             {
                 lblMsg.ForeColor = Color.Red;
-                lblMsg.Text = "❌ Unable to add to cart (missing product table mapping).";
+                lblMsg.Text = "❌ Unable to add to cart (missing product mapping).";
                 return;
             }
 
             DataTable cart = GetOrCreateCart();
 
-            // Find existing row
+            // find existing row using (SourceTable + SourceProductId)
             DataRow existing = null;
             foreach (DataRow r in cart.Rows)
             {
@@ -164,7 +167,7 @@ namespace SmashZone.Pages.User
                 int rPid = Convert.ToInt32(r["SourceProductId"]);
 
                 if (string.Equals(rTbl, sourceTable, StringComparison.OrdinalIgnoreCase)
-                    && rPid == productId)
+                    && rPid == sourceProductId)
                 {
                     existing = r;
                     break;
@@ -175,7 +178,7 @@ namespace SmashZone.Pages.User
             {
                 DataRow nr = cart.NewRow();
                 nr["SourceTable"] = sourceTable;
-                nr["SourceProductId"] = productId;
+                nr["SourceProductId"] = sourceProductId;
                 nr["Title"] = p.ProductTitle;
                 nr["Image"] = p.ProductImage ?? "Images/no-image.png";
                 nr["Price"] = p.ProductPrice;
@@ -190,28 +193,12 @@ namespace SmashZone.Pages.User
 
             Session["Cart"] = cart;
 
-            // ✅ refresh badge instantly
+            // refresh badge instantly
             var m = this.Master as UserLogin;
             if (m != null) m.RefreshCartBadge();
 
             lblMsg.ForeColor = Color.Green;
             lblMsg.Text = "✅ Added to cart!";
-        }
-   
-
-
-        // ================= WISHLIST =================
-        protected void btnWishlist_Click(object sender, EventArgs e)
-        {
-            if (!IsUserLoggedIn())
-            {
-                lblMsg.ForeColor = Color.Red;
-                lblMsg.Text = "❌ Please login to add to wishlist.";
-                return;
-            }
-
-            lblMsg.ForeColor = Color.Green;
-            lblMsg.Text = "✅ Added to wishlist!";
         }
 
         // ================= REVIEW ACCESS CONTROL =================
@@ -229,17 +216,31 @@ namespace SmashZone.Pages.User
                 return;
             }
 
-            int productId = int.Parse(hfId.Value);
             int accountId = int.Parse(Session["AccountId"].ToString());
 
-            int txId = ProductReview.GetNextEligibleTransactionId(productId, accountId);
+            // ✅ IMPORTANT: check eligibility using source mapping
+            string srcTbl = hfSourceTable.Value;
+            int srcPid = 0;
+            int.TryParse(hfSourceProductId.Value, out srcPid);
+
+            if (string.IsNullOrWhiteSpace(srcTbl) || srcPid <= 0)
+            {
+                lblRatingMsg.ForeColor = Color.Red;
+                lblRatingMsg.Text = "❌ Product mapping missing (cannot verify purchase).";
+                return;
+            }
+
+            // ✅ ALSO include ProductId (All_Products.Id) because your unique constraint includes ProductId
+            int allProductsId = int.Parse(hfId.Value);
+
+            int txId = ProductReview.GetNextEligibleTransactionId(srcTbl, srcPid, accountId, allProductsId);
 
             if (txId <= 0)
             {
                 lblRatingMsg.ForeColor = Color.Red;
                 lblRatingMsg.Text =
                     "❌ You can only review after purchasing this product " +
-                    "(or you've already reviewed all purchases).";
+                    "(or you've already reviewed your purchases).";
                 return;
             }
 
@@ -259,9 +260,10 @@ namespace SmashZone.Pages.User
                 return;
             }
 
-            int productId = int.Parse(hfId.Value);
+            int allProductsId = int.Parse(hfId.Value);
             int accountId = int.Parse(Session["AccountId"].ToString());
 
+            // read tx id granted by ApplyReviewAccessUI()
             int txId;
             if (!int.TryParse(hfEligibleTransactionId.Value, out txId) || txId <= 0)
             {
@@ -282,7 +284,7 @@ namespace SmashZone.Pages.User
                 comment = comment.Substring(0, 1000);
 
             ProductReview.InsertReview(
-                productId,
+                allProductsId,
                 accountId,
                 txId,
                 rating,
@@ -293,23 +295,23 @@ namespace SmashZone.Pages.User
             lblRatingMsg.Text = "✅ Review submitted!";
             txtReview.Text = "";
 
-            LoadRatings(productId);
+            LoadRatings(allProductsId);
             ApplyReviewAccessUI();
         }
 
         // ================= LOAD RATINGS =================
-        private void LoadRatings(int productId)
+        private void LoadRatings(int allProductsId)
         {
             int currentId = 0;
             if (Session["AccountId"] != null)
                 int.TryParse(Session["AccountId"].ToString(), out currentId);
 
-            var summary = ProductReview.GetSummary(productId);
+            var summary = ProductReview.GetSummary(allProductsId);
             lblAvgRatingBottom.Text = summary.avg.ToString("0.0");
             lblRatingCountBottom.Text = summary.count.ToString();
             lblStarsBottom.Text = ProductReview.MakeStarsFromAverage(summary.avg);
 
-            DataTable dt = ProductReview.GetReviewsForProduct(productId, currentId);
+            DataTable dt = ProductReview.GetReviewsForProduct(allProductsId, currentId);
             rptReviews.DataSource = dt;
             rptReviews.DataBind();
 

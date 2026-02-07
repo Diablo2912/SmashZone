@@ -13,5 +13,17 @@ namespace SmashZone.Master_Pages
         {
 
         }
+
+        protected void btnNavSearch_Click(object sender, EventArgs e)
+        {
+            var tb = FindControl("txtNavSearch") as System.Web.UI.WebControls.TextBox;
+            if (tb == null) return;
+
+            string q = (tb.Text ?? "").Trim();
+            if (q.Length == 0) return;
+
+            Response.Redirect("~/Pages/User/search.aspx?q=" + Server.UrlEncode(q));
+        }
+
     }
 }

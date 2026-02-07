@@ -2,7 +2,7 @@
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using SmashZone.App_Code;
+using System.Linq;
 
 namespace SmashZone.Pages.User
 {
@@ -12,18 +12,77 @@ namespace SmashZone.Pages.User
         {
             if (!IsPostBack)
             {
+                hfMaxPrice.Value = "500";
+                hfTypes.Value = "All";
+
+                if (!string.IsNullOrEmpty(Request.QueryString["maxPrice"]))
+                    hfMaxPrice.Value = Request.QueryString["maxPrice"];
+
+                if (!string.IsNullOrEmpty(Request.QueryString["types"]))
+                    hfTypes.Value = Request.QueryString["types"];
+
                 LoadProducts();
             }
         }
 
+        protected void btnApplyFilters_Click(object sender, EventArgs e)
+        {
+            LoadProducts();
+        }
+
+        protected string GetStockBadge(object stockObj)
+        {
+            int stock = 0;
+            if (stockObj != null && stockObj != DBNull.Value)
+                int.TryParse(stockObj.ToString(), out stock);
+
+            if (stock <= 0)
+                return "<span class='p-badge p-badge-soldout'>SOLD OUT</span>";
+
+            if (stock < 50)
+                return "<span class='p-badge p-badge-low'>LOW STOCK</span>";
+
+            return "";
+        }
+
+        protected string GetViewBtnClass(object stockObj)
+        {
+            int stock = 0;
+            if (stockObj != null && stockObj != DBNull.Value)
+                int.TryParse(stockObj.ToString(), out stock);
+
+            return stock <= 0 ? "btn-disabled" : "";
+        }
+
+        public string GetSortUrl(string sort)
+        {
+            string maxPrice = hfMaxPrice.Value;
+            string types = hfTypes.Value;
+
+            return ResolveUrl("~/Pages/User/squashProducts.aspx"
+                + "?sort=" + Uri.EscapeDataString(sort)
+                + "&maxPrice=" + Uri.EscapeDataString(maxPrice ?? "500")
+                + "&types=" + Uri.EscapeDataString(types ?? "All"));
+        }
+
         private void LoadProducts()
         {
-            string connStr = ConfigurationManager.ConnectionStrings["SmashZoneCS"].ConnectionString;
+            string cs = ConfigurationManager.ConnectionStrings["SmashZoneCS"].ConnectionString;
 
-            string category = Request.QueryString["category"];
-            string sort = Request.QueryString["sort"];
+            string typesCsv = hfTypes.Value;
+            int maxPrice = 500;
+            int.TryParse(hfMaxPrice.Value, out maxPrice);
 
-            string orderBy = "ProductTitle ASC";
+            var types = (typesCsv ?? "")
+                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .ToList();
+
+            bool isAll = types.Contains("All");
+
+            string sort = (Request.QueryString["sort"] ?? "").ToLower();
+
+            string orderBy;
             switch (sort)
             {
                 case "price_asc": orderBy = "ProductPrice ASC"; break;
@@ -33,43 +92,40 @@ namespace SmashZone.Pages.User
                 default: orderBy = "ProductTitle ASC"; break;
             }
 
-            string sql = $@"
-SELECT
-    Id,
-    ProductTitle,
-    ProductImage,
-    ProductPrice
+            string sql = @"
+SELECT Id, ProductTitle, ProductImage, ProductPrice, ProductStock, ProductCategory
 FROM dbo.Squash_Products
-WHERE (@Category IS NULL OR ProductCategory = @Category)
-ORDER BY {orderBy};
+WHERE ProductPrice <= @MaxPrice
 ";
+
+            if (!isAll && types.Any())
+            {
+                sql += " AND ProductCategory IN (" +
+                       string.Join(",", types.Select((t, i) => "@cat" + i)) + ")";
+            }
+
+            sql += " ORDER BY " + orderBy;
 
             DataTable dt = new DataTable();
 
-            try
+            using (SqlConnection conn = new SqlConnection(cs))
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
             {
-                using (SqlConnection conn = new SqlConnection(connStr))
-                using (SqlCommand cmd = new SqlCommand(sql, conn))
-                {
-                    if (string.IsNullOrEmpty(category))
-                        cmd.Parameters.AddWithValue("@Category", DBNull.Value);
-                    else
-                        cmd.Parameters.AddWithValue("@Category", category);
+                cmd.Parameters.AddWithValue("@MaxPrice", maxPrice);
 
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                    {
-                        da.Fill(dt);
-                    }
+                if (!isAll && types.Any())
+                {
+                    for (int i = 0; i < types.Count; i++)
+                        cmd.Parameters.AddWithValue("@cat" + i, types[i]);
                 }
 
-                rptProducts.DataSource = dt;
-                rptProducts.DataBind();
-                lblProductCount.Text = dt.Rows.Count.ToString();
+                using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    da.Fill(dt);
             }
-            catch (Exception)
-            {
-                lblProductCount.Text = "0";
-            }
+
+            rptProducts.DataSource = dt;
+            rptProducts.DataBind();
+            lblProductCount.Text = dt.Rows.Count.ToString();
         }
     }
 }

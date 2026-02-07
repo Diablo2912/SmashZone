@@ -82,6 +82,16 @@
         }
 
         .p-price { font-weight: 800; }
+
+        .p-badge{
+          position:absolute; top:12px; right:12px;
+          padding:.35rem .6rem; border-radius:999px;
+          font-size:.75rem; font-weight:800; letter-spacing:.06em;
+          z-index:2; border:1px solid transparent;
+        }
+        .p-badge-soldout{ background:#fee2e2; border-color:#fecaca; color:#991b1b; }
+        .p-badge-low{ background:#fef3c7; border-color:#fde68a; color:#92400e; }
+
     </style>
 
     <!-- ================= PAGE TITLE ================= -->
@@ -225,30 +235,34 @@
             <div class="row g-4">
                 <asp:Repeater ID="rptResults" runat="server">
                     <ItemTemplate>
-                        <div class="col-sm-6 col-md-4 col-xl-3">
-                            <div class="card p-card h-100">
+    <div class="col-sm-6 col-md-4 col-xl-3">
+        <div class="card p-card h-100" style="position:relative;">
 
-                                <div class="p-img-wrap">
-                                    <img class="p-img"
-                                         src='<%# GetImgUrl(Eval("ProductImage")) %>'
-                                         alt="product" />
-                                </div>
+            <!-- STOCK BADGE -->
+            <asp:Literal runat="server" Text='<%# GetStockBadge(Eval("ProductStock")) %>' />
 
-                                <div class="card-body d-flex flex-column">
-                                    <div class="p-title"><%# Eval("ProductTitle") %></div>
-                                    <p class="p-price mb-3">
-                                        $<%# Eval("ProductPrice","{0:F2}") %>
-                                    </p>
+            <div class="p-img-wrap">
+                <img class="p-img"
+                     src='<%# GetImgUrl(Eval("ProductImage")) %>'
+                     alt="product" />
+            </div>
 
-                                    <a class="btn btn-dark mt-auto"
-                                       href='<%# ResolveUrl("~/Pages/User/productDetails.aspx?id=" + Eval("Id")) %>'>
-                                        View
-                                    </a>
-                                </div>
+            <div class="card-body d-flex flex-column">
+                <div class="p-title"><%# Eval("ProductTitle") %></div>
+                <p class="p-price mb-3">
+                    $<%# Eval("ProductPrice","{0:F2}") %>
+                </p>
 
-                            </div>
-                        </div>
-                    </ItemTemplate>
+                <a class='btn btn-dark mt-auto <%# GetViewBtnClass(Eval("ProductStock")) %>'
+                   href='<%# ResolveUrl("~/Pages/User/productDetails.aspx?id=" + Eval("Id")) %>'>
+                    View
+                </a>
+            </div>
+
+        </div>
+    </div>
+</ItemTemplate>
+
                 </asp:Repeater>
             </div>
 

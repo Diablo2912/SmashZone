@@ -55,7 +55,11 @@
 
             <div class="col">
                 <label class="label">Price (e.g. 49.90)</label>
-                <asp:TextBox ID="txtPrice" runat="server" CssClass="input" TextMode="Number" />
+                <asp:TextBox ID="txtPrice" runat="server"
+                    CssClass="input"
+                    TextMode="Number"
+                    step="0.01"
+                    min="0" />
                 <asp:RequiredFieldValidator ID="rfvPrice" runat="server"
                     ControlToValidate="txtPrice"
                     ErrorMessage="Price is required."

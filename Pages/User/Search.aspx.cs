@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Configuration;
+using System.Collections.Generic;
 
 namespace SmashZone.Pages.User
 {
@@ -16,34 +17,29 @@ namespace SmashZone.Pages.User
             {
                 hfMaxPrice.Value = "500";
                 hfTypes.Value = "All";
+
+                string q = (Request.QueryString["q"] ?? "").Trim();
+                txtQ.Text = q;
+
                 BindResults();
             }
         }
 
 
-        protected void btnSearch_Click(object sender, EventArgs e)
-        {
-            BindResults();
-        }
-
-        protected void btnApplyFilters_Click(object sender, EventArgs e)
-        {
-            BindResults();
-        }
-
-        protected void ddlSort_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            BindResults();
-        }
+        protected void btnSearch_Click(object sender, EventArgs e) => BindResults();
+        protected void btnApplyFilters_Click(object sender, EventArgs e) => BindResults();
+        protected void ddlSort_SelectedIndexChanged(object sender, EventArgs e) => BindResults();
 
         private void BindResults()
         {
-            string keyword = txtQ.Text.Trim();
+            string keyword = (txtQ.Text ?? "").Trim();
             string typesCsv = hfTypes.Value;
-            int maxPrice = int.Parse(hfMaxPrice.Value);
+            int maxPrice = 500;
+            int.TryParse(hfMaxPrice.Value, out maxPrice);
 
             var types = (typesCsv ?? "")
                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
                 .ToList();
 
             bool isAll = types.Contains("All");
@@ -51,7 +47,8 @@ namespace SmashZone.Pages.User
             using (SqlConnection con = new SqlConnection(cs))
             {
                 string sql = @"
-SELECT * FROM All_Products
+SELECT Id, ProductTitle, ProductImage, ProductPrice, ProductStock, ProductCategory
+FROM All_Products
 WHERE ProductPrice <= @MaxPrice
 AND (@Keyword = '' OR ProductTitle LIKE '%' + @Keyword + '%')
 ";
@@ -68,6 +65,7 @@ AND (@Keyword = '' OR ProductTitle LIKE '%' + @Keyword + '%')
                     case "price_desc": sql += " ORDER BY ProductPrice DESC"; break;
                     case "name_asc": sql += " ORDER BY ProductTitle ASC"; break;
                     case "name_desc": sql += " ORDER BY ProductTitle DESC"; break;
+                    default: sql += " ORDER BY ProductTitle ASC"; break;
                 }
 
                 SqlCommand cmd = new SqlCommand(sql, con);
@@ -92,6 +90,32 @@ AND (@Keyword = '' OR ProductTitle LIKE '%' + @Keyword + '%')
             }
         }
 
+        // ===== STOCK UI =====
+        protected string GetStockBadge(object stockObj)
+        {
+            int stock = 0;
+            if (stockObj != null && stockObj != DBNull.Value)
+                int.TryParse(stockObj.ToString(), out stock);
+
+            if (stock <= 0)
+                return "<span class='p-badge p-badge-soldout'>SOLD OUT</span>";
+
+            if (stock < 50)
+                return "<span class='p-badge p-badge-low'>LOW STOCK</span>";
+
+            return "";
+        }
+
+        protected string GetViewBtnClass(object stockObj)
+        {
+            int stock = 0;
+            if (stockObj != null && stockObj != DBNull.Value)
+                int.TryParse(stockObj.ToString(), out stock);
+
+            return stock <= 0 ? "btn-disabled" : "";
+        }
+
+        // ===== IMAGE URL =====
         protected string GetImgUrl(object productImageObj)
         {
             string img = (productImageObj == null) ? "" : productImageObj.ToString().Trim();
@@ -99,14 +123,10 @@ AND (@Keyword = '' OR ProductTitle LIKE '%' + @Keyword + '%')
             if (string.IsNullOrWhiteSpace(img))
                 return ResolveUrl("~/Images/no-image.png");
 
-            // If DB already stores a full/relative path, use it as-is
-            // e.g. "Images/Product_Img/a.png" or "/Images/Product_Img/a.png"
             if (img.StartsWith("~") || img.StartsWith("/") || img.Contains("/"))
                 return ResolveUrl(img.StartsWith("~") ? img : "~/" + img.TrimStart('/'));
 
-            // Otherwise assume it's just a filename
             return ResolveUrl("~/Images/Product_Img/" + img);
         }
-
     }
 }

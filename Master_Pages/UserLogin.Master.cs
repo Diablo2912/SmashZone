@@ -67,5 +67,24 @@ namespace SmashZone.Master_Pages
 
             Response.Redirect("~/Pages/User/search.aspx?q=" + Server.UrlEncode(q));
         }
+
+        protected void btnSignOut_Click(object sender, EventArgs e)
+        {
+            // 🔐 Clear all session data
+            Session.Clear();
+            Session.RemoveAll();
+            Session.Abandon();
+
+            // 🧹 Optional: kill auth cookie (safe practice)
+            if (Request.Cookies["ASP.NET_SessionId"] != null)
+            {
+                Response.Cookies["ASP.NET_SessionId"].Expires =
+                    DateTime.Now.AddDays(-1);
+            }
+
+            // 🔁 Redirect to login page
+            Response.Redirect("~/Pages/User/Login.aspx", true);
+        }
+
     }
 }

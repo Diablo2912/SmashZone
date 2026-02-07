@@ -175,6 +175,7 @@
     <None Include="App_Data\SmashZone_log.ldf">
       <DependentUpon>SmashZone.mdf</DependentUpon>
     </None>
+    <Content Include="favicon-32x32.png" />
     <Content Include="Images\badminton.png" />
     <Content Include="Images\banner1.png" />
     <Content Include="Images\banner2.png" />
@@ -225,7 +226,6 @@
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\Site.css" />
     <Content Include="Pages\User\Default.aspx" />
-    <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Pages\User\Faq.aspx" />
     <Content Include="Pages\User\Login.aspx" />

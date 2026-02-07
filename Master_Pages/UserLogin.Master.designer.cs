@@ -42,6 +42,15 @@ namespace SmashZone.Master_Pages
         protected global::System.Web.UI.WebControls.LinkButton btnNavSearch;
 
         /// <summary>
+        /// btnSignOut control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnSignOut;
+
+        /// <summary>
         /// upCartBadge control.
         /// </summary>
         /// <remarks>
