@@ -26,13 +26,12 @@ jobs:
       - name: Build solution
         run: msbuild .\SmashZone.sln /p:Configuration=Release
 
-      # Publishes a web deploy package (zip) or a folder, depending on your project type.
       - name: Publish Web Project (folder)
         run: |
-          msbuild .\SmashZone.sln ^
-            /p:Configuration=Release ^
-            /p:DeployOnBuild=true ^
-            /p:WebPublishMethod=FileSystem ^
+          msbuild .\SmashZone.sln `
+            /p:Configuration=Release `
+            /p:DeployOnBuild=true `
+            /p:WebPublishMethod=FileSystem `
             /p:publishUrl="${{ github.workspace }}\_publish"
 
       - name: Upload published site artifact
