@@ -171,6 +171,7 @@
   <ItemGroup>
     <Content Include=".gitattributes" />
     <Content Include=".gitignore" />
+    <Content Include="Default.aspx" />
     <None Include="App_Data\SmashZone.mdf" />
     <None Include="App_Data\SmashZone_log.ldf">
       <DependentUpon>SmashZone.mdf</DependentUpon>
@@ -269,6 +270,7 @@
     <Content Include="Master_Pages\AdminLogin.Master" />
     <Content Include="README.md" />
     <Content Include=".github\workflows\dotnet-framework-ci.yml" />
+    <Content Include="CONTRIBUTING.md" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -497,6 +499,13 @@
     </Compile>
     <Compile Include="Master_Pages\Site.Master.designer.cs">
       <DependentUpon>Site.Master</DependentUpon>
+    </Compile>
+    <Compile Include="Default.aspx.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Default.aspx.designer.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup />
