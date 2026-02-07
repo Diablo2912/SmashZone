@@ -171,10 +171,10 @@
   <ItemGroup>
     <Content Include=".gitattributes" />
     <Content Include=".gitignore" />
-    <Content Include="App_Data\SmashZone.mdf" />
-    <Content Include="App_Data\SmashZone_log.ldf">
+    <None Include="App_Data\SmashZone.mdf" />
+    <None Include="App_Data\SmashZone_log.ldf">
       <DependentUpon>SmashZone.mdf</DependentUpon>
-    </Content>
+    </None>
     <Content Include="Images\badminton.png" />
     <Content Include="Images\banner1.png" />
     <Content Include="Images\banner2.png" />
