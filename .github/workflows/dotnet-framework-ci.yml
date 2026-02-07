@@ -1,0 +1,42 @@
+﻿name: ASP.NET Framework CI
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore .\SmashZone.sln
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build solution
+        run: msbuild .\SmashZone.sln /p:Configuration=Release
+
+      # Publishes a web deploy package (zip) or a folder, depending on your project type.
+      - name: Publish Web Project (folder)
+        run: |
+          msbuild .\SmashZone.sln ^
+            /p:Configuration=Release ^
+            /p:DeployOnBuild=true ^
+            /p:WebPublishMethod=FileSystem ^
+            /p:publishUrl="${{ github.workspace }}\_publish"
+
+      - name: Upload published site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-site
+          path: _publish
