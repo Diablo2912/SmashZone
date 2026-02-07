@@ -1,4 +1,6 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="SmashZone.SiteMaster" %>
+﻿<%@ Master Language="C#" AutoEventWireup="true"
+    CodeBehind="Site.master.cs"
+    Inherits="SmashZone.SiteMaster" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -47,7 +49,6 @@
             border: 1px solid rgba(0,0,0,.08);
             box-shadow: 0 18px 40px rgba(0,0,0,.15);
         }
-
         .mega-title {
             font-weight: 800;
             letter-spacing: .02em;
@@ -55,16 +56,13 @@
             text-transform: uppercase;
             font-size: .95rem;
         }
-
         .mega-link {
             display: block;
             padding: 8px 0;
             color: #111;
             text-decoration: none;
         }
-
         .mega-link:hover { text-decoration: underline; }
-
         .mega-col + .mega-col { border-left: 1px solid rgba(0,0,0,.08); }
 
         @media (max-width: 991px) {
@@ -76,17 +74,20 @@
                 padding-top: 12px;
             }
         }
-
-        /* OPTIONAL: hover open on desktop only */
         @media (min-width: 992px) {
             .mega-dropdown:hover .dropdown-menu { display: block; }
             .mega-dropdown:hover > .dropdown-toggle { color: #fff; }
         }
     </style>
+
+    <asp:ContentPlaceHolder ID="head" runat="server"></asp:ContentPlaceHolder>
 </head>
 
 <body>
 <form runat="server">
+
+    <!-- ✅ Must be INSIDE the server form -->
+    <asp:HiddenField ID="hfIsLoggedIn" runat="server" />
 
     <asp:ScriptManager runat="server">
         <Scripts>
@@ -100,8 +101,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
 
-            <!-- Brand -> /Home -->
-            <a class="navbar-brand" runat="server" href="<%$ RouteUrl:RouteName=RouteHome %>">SmashZone Sports</a>
+            <a class="navbar-brand" runat="server" href="~/Pages/User/Default.aspx">SmashZone Sports</a>
 
             <button class="navbar-toggler" type="button"
                     data-bs-toggle="collapse"
@@ -134,25 +134,25 @@
                                 <!-- SPORTS -->
                                 <div class="col-lg-4 mega-col px-lg-3">
                                     <div class="mega-title">Sports</div>
-                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteBadmintonProducts %>">Badminton</a>
-                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteTennisProducts %>">Tennis</a>
-                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteSquashProducts %>">Squash</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx">Badminton</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx">Tennis</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx">Squash</a>
                                 </div>
 
                                 <!-- SHOES -->
                                 <div class="col-lg-4 mega-col px-lg-3">
                                     <div class="mega-title">Shoes</div>
-                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteBadmintonProducts %>?category=Shoes">Badminton Shoes</a>
-                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteTennisProducts %>?category=Shoes">Tennis Shoes</a>
-                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteSquashProducts %>?category=Shoes">Squash Shoes</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx?category=Shoes">Badminton Shoes</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx?category=Shoes">Tennis Shoes</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx?category=Shoes">Squash Shoes</a>
                                 </div>
 
                                 <!-- RACQUET -->
                                 <div class="col-lg-4 mega-col px-lg-3">
                                     <div class="mega-title">Racquet</div>
-                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteBadmintonProducts %>?category=Rackets">Badminton Racquets</a>
-                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteTennisProducts %>?category=Rackets">Tennis Racquets</a>
-                                    <a class="mega-link" runat="server" href="<%$ RouteUrl:RouteName=RouteSquashProducts %>?category=Rackets">Squash Racquets</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/badmintonProducts.aspx?category=Rackets">Badminton Racquets</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/tennisProducts.aspx?category=Rackets">Tennis Racquets</a>
+                                    <a class="mega-link" runat="server" href="~/Pages/User/squashProducts.aspx?category=Rackets">Squash Racquets</a>
                                 </div>
 
                             </div>
@@ -170,14 +170,13 @@
                             About Us
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="aboutDropdown">
-                            <li><a class="dropdown-item" runat="server" href="<%$ RouteUrl:RouteName=RouteAbout %>">About Us</a></li>
-                            <li><a class="dropdown-item" runat="server" href="<%$ RouteUrl:RouteName=RouteFaq %>">FAQs</a></li>
+                            <li><a class="dropdown-item" href="/Pages/User/About.aspx">About Us</a></li>
+                            <li><a class="dropdown-item" runat="server" href="~/Pages/User/Faq.aspx">FAQs</a></li>
                         </ul>
                     </li>
 
-                    <!-- CONTACT -->
                     <li class="nav-item">
-                        <a class="nav-link" runat="server" href="<%$ RouteUrl:RouteName=RouteContact %>">Contact</a>
+                        <a class="nav-link" runat="server" href="~/Pages/User/Contact.aspx">Contact</a>
                     </li>
 
                 </ul>
@@ -201,25 +200,30 @@
                 <!-- RIGHT SIDE ICONS -->
                 <ul class="navbar-nav mb-0 align-items-center">
 
-                    <!-- LOGIN ICON -->
+                    <!-- USER ICON -->
                     <li class="nav-item">
                         <a class="nav-link text-light d-flex align-items-center"
-                           runat="server" href="<%$ RouteUrl:RouteName=RouteLogin %>" title="Login">
+                           runat="server" href="~/Pages/User/Login.aspx">
                             <i class="bi bi-person fs-2"></i>
                         </a>
                     </li>
 
-                    <!-- CART ICON -->
+                    <!-- CART ICON + BADGE (distinct items count) -->
+                    <!-- CART ICON + BADGE -->
                     <li class="nav-item">
-                        <a class="nav-link text-light d-flex align-items-center position-relative"
-                           runat="server" href="<%$ RouteUrl:RouteName=RouteCart %>">
-                            <i class="bi bi-cart fs-3"></i>
+                        <asp:UpdatePanel ID="upCartBadge" runat="server" UpdateMode="Conditional">
+                            <ContentTemplate>
+                                <a class="nav-link text-light position-relative"
+                                   runat="server" href="~/Pages/User/Cart.aspx">
+                                    <i class="bi bi-cart fs-3"></i>
 
-                            <asp:Label ID="lblCartCount" runat="server"
-                                CssClass="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                Style="font-size:.70rem; display:none;">
-                            </asp:Label>
-                        </a>
+                                    <!-- ✅ MUST EXIST OR lblCartCount WILL BE NULL -->
+                                    <asp:Label ID="lblCartCount" runat="server"
+                                        CssClass="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                        Style="font-size:.7rem; display:none;" />
+                                </a>
+                            </ContentTemplate>
+                        </asp:UpdatePanel>
                     </li>
 
                 </ul>
@@ -242,6 +246,5 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
-
 </body>
 </html>

@@ -15,6 +15,24 @@ namespace SmashZone.Pages.User
     {
 
         /// <summary>
+        /// rblChannel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.RadioButtonList rblChannel;
+
+        /// <summary>
+        /// pChannelMsg control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl pChannelMsg;
+
+        /// <summary>
         /// btnVerify control.
         /// </summary>
         /// <remarks>
@@ -22,6 +40,15 @@ namespace SmashZone.Pages.User
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnVerify;
+
+        /// <summary>
+        /// btnResend control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnResend;
 
         /// <summary>
         /// hfOtp control.

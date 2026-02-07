@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="Product Details"
     Language="C#"
-    MasterPageFile="~/Master_Pages/Site.Master"
+    MasterPageFile="~/Master_Pages/UserLogin.Master"
     AutoEventWireup="true"
     CodeBehind="productDetails.aspx.cs"
     Inherits="SmashZone.Pages.User.productDetails" %>
@@ -37,7 +37,14 @@
     .meta .row2 { display:flex; gap:10px; flex-wrap:wrap; }
     .chip { border:1px solid #ddd; padding:.35rem .6rem; border-radius: 999px; font-size: .9rem; background:#fff; }
 
-    .qty-row { margin-top: 18px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .qty-row {
+        margin-top: 18px;
+        display: flex;
+        flex-direction: column;   /* ✅ stack vertically */
+        align-items: flex-start;  /* ✅ align left */
+        gap: 10px;
+    }
+
     .qty-input { width: 90px; }
 
     .btn-wide { min-width: 210px; padding: 12px 14px; border-radius: 0; font-weight: 600; letter-spacing: .06em; }
@@ -58,7 +65,7 @@
     <div class="crumbs">
         <a runat="server" href="~/Pages/User/Default.aspx">Home</a>
         &nbsp;›&nbsp;
-        <a runat="server" href="~/Pages/User/Products.aspx">All Products</a>
+        <a runat="server" href="~/Pages/User/badmintonProducts.aspx">All Products</a>
         &nbsp;›&nbsp;
         <asp:Label ID="lblCrumbTitle" runat="server" Text="Product"></asp:Label>
     </div>
@@ -74,10 +81,6 @@
 
         <!-- RIGHT: DETAILS -->
         <div>
-
-            <div class="type">
-                <asp:Label ID="lblType" runat="server" Text="product"></asp:Label>
-            </div>
 
             <div class="title">
                 <asp:Label ID="lblTitle" runat="server"></asp:Label>
@@ -113,25 +116,23 @@
             </div>
 
             <!-- Quantity + buttons -->
+            <!-- Quantity + button (button below quantity) -->
             <div class="qty-row">
                 <div>
                     <div class="small-muted mb-1">Quantity</div>
-                    <asp:TextBox ID="txtQty" runat="server" CssClass="form-control qty-input"
+                    <asp:TextBox ID="txtQty" runat="server"
+                        CssClass="form-control qty-input"
                         Text="1" TextMode="Number" />
                 </div>
 
-                <div class="mt-4 mt-sm-0 d-flex gap-2 flex-wrap" style="align-items:flex-end;">
-                    <asp:Button ID="btnWishlist" runat="server"
-                        CssClass="btn btn-wishlist btn-wide"
-                        Text="ADD TO WISHLIST"
-                        OnClick="btnWishlist_Click" />
-
+                <div>
                     <asp:Button ID="btnAddToCart" runat="server"
                         CssClass="btn btn-cart btn-wide"
                         Text="ADD TO CART"
                         OnClick="btnAddToCart_Click" />
                 </div>
             </div>
+
 
             <!-- Description -->
             <div class="desc">
@@ -237,6 +238,8 @@
             <asp:HiddenField ID="hfSport" runat="server" />
             <asp:HiddenField ID="hfSourceTable" runat="server" />
             <asp:HiddenField ID="hfSourceProductId" runat="server" />
+            <asp:HiddenField ID="hfEligibleTransactionId" runat="server" />
+
 
         </div>
     </div>

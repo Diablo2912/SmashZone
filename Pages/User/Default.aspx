@@ -134,34 +134,49 @@
     </style>
 
     <!-- ===================== HERO CAROUSEL ===================== -->
-    <div id="carouselExampleInterval" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div id="carouselExampleInterval"
+         class="carousel slide mb-5"
+         data-bs-ride="carousel"
+         data-bs-interval="8000"
+         data-bs-pause="false">
 
+        <!-- INDICATORS -->
         <div class="carousel-indicators">
-            <button type="button" data-bs-target="#carouselExampleInterval" data-bs-slide-to="0" class="active"></button>
-            <button type="button" data-bs-target="#carouselExampleInterval" data-bs-slide-to="1"></button>
-            <button type="button" data-bs-target="#carouselExampleInterval" data-bs-slide-to="2"></button>
+            <button type="button" data-bs-target="#carouselExampleInterval"
+                    data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#carouselExampleInterval"
+                    data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#carouselExampleInterval"
+                    data-bs-slide-to="2"></button>
         </div>
 
+        <!-- SLIDES -->
         <div class="carousel-inner">
-            <div class="carousel-item active" data-bs-interval="5000">
+            <div class="carousel-item active">
                 <img src="/Images/banner1.png" class="d-block carousel-img" alt="Slide 1" />
             </div>
-            <div class="carousel-item" data-bs-interval="5000">
+
+            <div class="carousel-item">
                 <img src="/Images/banner2.png" class="d-block carousel-img" alt="Slide 2" />
             </div>
-            <div class="carousel-item" data-bs-interval="5000">
+
+            <div class="carousel-item">
                 <img src="/Images/banner3.png" class="d-block carousel-img" alt="Slide 3" />
             </div>
         </div>
 
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleInterval" data-bs-slide="prev">
+        <!-- ARROWS -->
+        <button class="carousel-control-prev" type="button"
+                data-bs-target="#carouselExampleInterval" data-bs-slide="prev">
             <span class="carousel-control-prev-icon"></span>
         </button>
 
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleInterval" data-bs-slide="next">
+        <button class="carousel-control-next" type="button"
+                data-bs-target="#carouselExampleInterval" data-bs-slide="next">
             <span class="carousel-control-next-icon"></span>
         </button>
     </div>
+
 
     <!-- ===================== BROWSE BY SPORT ===================== -->
     <h4 class="mb-4">Browse By Sport</h4>
@@ -192,7 +207,7 @@
 
             <div class="sport-card">
                 <div class="card h-100">
-                    <img src="/Images/test3.png" class="card-img-top" alt="Tennis" />
+                    <img src="/Images/test3.jpg" class="card-img-top" alt="Tennis" />
                     <div class="card-body text-center">
                         <h6 class="card-title">Tennis</h6>
                         <a href="/Pages/User/tennis Products" class="btn btn-sm btn-primary">View</a>

@@ -183,7 +183,7 @@
             About Us
         </a>
         <ul class="dropdown-menu" aria-labelledby="aboutDropdown">
-            <li><a class="dropdown-item" href="#">About Us</a></li>
+            <li><a class="dropdown-item" href="/Pages/User/About.aspx">About Us</a></li>
             <li><a class="dropdown-item" runat="server" href="~/Pages/User/Faq.aspx">FAQs</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li><a class="dropdown-item" href="#">Something else here</a></li>

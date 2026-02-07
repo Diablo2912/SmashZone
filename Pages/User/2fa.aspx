@@ -26,11 +26,10 @@
             box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
         }
 
-        .resend {
-            font-size: 12px;
-        }
+        .resend { font-size: 12px; }
 
-        .resend a.disabled {
+        .resend a.disabled,
+        .resend .disabled {
             pointer-events: none;
             opacity: 0.6;
             text-decoration: none;
@@ -43,8 +42,21 @@
             <div class="col-12 col-md-6 col-lg-4" style="min-width: 500px;">
                 <div class="card bg-white mb-5 mt-5 border-0" style="box-shadow: 0 12px 15px rgba(0, 0, 0, 0.02);">
                     <div class="card-body p-5 text-center">
+
                         <h4>Verify</h4>
-                        <p>Your code was sent to you via email</p>
+
+                        <!-- ✅ Channel Option -->
+                        <asp:RadioButtonList ID="rblChannel" runat="server"
+                            RepeatDirection="Horizontal"
+                            CssClass="d-flex justify-content-center gap-4 mb-3"
+                            AutoPostBack="true"
+                            OnSelectedIndexChanged="rblChannel_SelectedIndexChanged">
+                            <asp:ListItem Text="Email" Value="email" Selected="True" />
+                            <asp:ListItem Text="SMS" Value="sms" />
+                        </asp:RadioButtonList>
+
+                        <!-- message changes depending on channel -->
+                        <p id="pChannelMsg" runat="server">Your code was sent to you via email</p>
 
                         <div class="otp-field mb-4">
                             <input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]*" />
@@ -62,9 +74,13 @@
 
                         <p class="resend text-muted mb-0">
                             Didn't receive code?
-                            <a id="lnkResend" class="disabled" href="2fa.aspx">
+                            <!-- ✅ real resend: server-side -->
+                            <asp:LinkButton ID="btnResend" runat="server"
+                                CssClass="disabled"
+                                OnClick="btnResend_Click"
+                                CausesValidation="false">
                                 Request again in <span id="countdown">01:00</span>
-                            </a>
+                            </asp:LinkButton>
                         </p>
 
                         <asp:HiddenField ID="hfOtp" runat="server" />
@@ -78,8 +94,10 @@
         (function () {
 
             // ========= Countdown (60s) =========
-            const lnkResend = document.getElementById("lnkResend");
             const cd = document.getElementById("countdown");
+
+            // btnResend is ASP.NET server control -> use ClientID
+            const btnResend = document.getElementById("<%= btnResend.ClientID %>");
 
             let remaining = 60;
 
@@ -93,8 +111,9 @@
                 cd.textContent = formatTime(remaining);
 
                 if (remaining <= 0) {
-                    lnkResend.classList.remove("disabled");
-                    lnkResend.textContent = "Request again";
+                    // enable click
+                    btnResend.classList.remove("disabled");
+                    btnResend.innerText = "Request again";
                     return;
                 }
 
@@ -107,7 +126,6 @@
             // ========= OTP Inputs =========
             const inputs = document.querySelectorAll(".otp-field > input");
 
-            // ✅ IMPORTANT: use ASP.NET ClientID for server control
             const button = document.getElementById("<%= btnVerify.ClientID %>");
             const hfOtp = document.getElementById("<%= hfOtp.ClientID %>");
 

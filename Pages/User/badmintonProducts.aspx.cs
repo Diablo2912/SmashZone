@@ -2,7 +2,6 @@
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using SmashZone.App_Code;
 
 namespace SmashZone.Pages.User
 {
@@ -11,76 +10,56 @@ namespace SmashZone.Pages.User
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
-            {
                 LoadProducts();
-            }
         }
+
+        protected string GetStockBadge(object stockObj)
+        {
+            int stock = Convert.ToInt32(stockObj);
+
+            if (stock <= 0)
+                return "<span class='p-badge p-badge-soldout'>SOLD OUT</span>";
+
+            if (stock < 50)
+                return "<span class='p-badge p-badge-low'>LOW STOCK</span>";
+
+            return "";
+        }
+
 
         private void LoadProducts()
         {
-            string connStr = ConfigurationManager.ConnectionStrings["SmashZoneCS"].ConnectionString;
-
-            // Querystring filters
-            string category = Request.QueryString["category"];
+            string cs = ConfigurationManager.ConnectionStrings["SmashZoneCS"].ConnectionString;
             string sort = Request.QueryString["sort"];
 
-            // Safe ORDER BY
             string orderBy = "ProductTitle ASC";
-            switch (sort)
-            {
-                case "price_asc":
-                    orderBy = "ProductPrice ASC";
-                    break;
-                case "price_desc":
-                    orderBy = "ProductPrice DESC";
-                    break;
-                case "name_desc":
-                    orderBy = "ProductTitle DESC";
-                    break;
-                case "name_asc":
-                default:
-                    orderBy = "ProductTitle ASC";
-                    break;
-            }
+            if (sort == "price_asc") orderBy = "ProductPrice ASC";
+            else if (sort == "price_desc") orderBy = "ProductPrice DESC";
+            else if (sort == "name_desc") orderBy = "ProductTitle DESC";
 
             string sql = $@"
 SELECT
     Id,
     ProductTitle,
     ProductImage,
-    ProductPrice
+    ProductPrice,
+    ProductStock
 FROM dbo.Badminton_Products
-WHERE (@Category IS NULL OR ProductCategory = @Category)
-ORDER BY {orderBy};
-";
+ORDER BY {orderBy};";
 
             DataTable dt = new DataTable();
 
-            try
+            using (SqlConnection conn = new SqlConnection(cs))
+            using (SqlCommand cmd = new SqlCommand(sql, conn))
+            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
             {
-                using (SqlConnection conn = new SqlConnection(connStr))
-                using (SqlCommand cmd = new SqlCommand(sql, conn))
-                {
-                    if (string.IsNullOrEmpty(category))
-                        cmd.Parameters.AddWithValue("@Category", DBNull.Value);
-                    else
-                        cmd.Parameters.AddWithValue("@Category", category);
-
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                    {
-                        da.Fill(dt);
-                    }
-                }
-
-                rptProducts.DataSource = dt;
-                rptProducts.DataBind();
-
-                lblProductCount.Text = dt.Rows.Count.ToString();
+                da.Fill(dt);
             }
-            catch (Exception)
-            {
-                lblProductCount.Text = "0";
-            }
+
+            rptProducts.DataSource = dt;
+            rptProducts.DataBind();
+
+            lblProductCount.Text = dt.Rows.Count.ToString();
         }
     }
 }

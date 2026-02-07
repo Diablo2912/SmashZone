@@ -42,15 +42,6 @@ namespace SmashZone.Pages.User
         protected global::System.Web.UI.WebControls.Image imgProduct;
 
         /// <summary>
-        /// lblType control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblType;
-
-        /// <summary>
         /// lblTitle control.
         /// </summary>
         /// <remarks>
@@ -112,15 +103,6 @@ namespace SmashZone.Pages.User
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtQty;
-
-        /// <summary>
-        /// btnWishlist control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnWishlist;
 
         /// <summary>
         /// btnAddToCart control.
@@ -274,5 +256,14 @@ namespace SmashZone.Pages.User
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.HiddenField hfSourceProductId;
+
+        /// <summary>
+        /// hfEligibleTransactionId control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfEligibleTransactionId;
     }
 }

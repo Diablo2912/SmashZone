@@ -134,6 +134,14 @@ body {
         <h2 class="login-title mb-3">SIGN UP</h2>
         <p class="text-muted mb-4">Please fill in the information below:</p>
 
+        <!-- ✅ MESSAGE PANEL -->
+        <asp:Panel ID="pnlMsg" runat="server" Visible="false" CssClass="mt-3">
+            <asp:Label ID="lblMsg" runat="server" />
+        </asp:Panel>
+
+        <!-- ✅ FORM WRAPPER PANEL -->
+        <asp:Panel ID="pnlForm" runat="server">
+
         <div class="center-box">
 
             <div class="mx-auto" style="width: 390px;">
@@ -207,7 +215,9 @@ body {
                 <span>SIGN UP</span>
             </asp:LinkButton>
 
-        </div>
+            </div> <!-- end center-box -->
+
+        </asp:Panel> <!-- end pnlForm -->
 
         <p class="text-muted">
             Already have an account?

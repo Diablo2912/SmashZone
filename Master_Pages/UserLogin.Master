@@ -1,4 +1,6 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="UserLogin.master.cs" Inherits="SmashZone.SiteMaster" %>
+﻿<%@ Master Language="C#" AutoEventWireup="true"
+    CodeBehind="UserLogin.master.cs"
+    Inherits="SmashZone.Master_Pages.UserLogin" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -165,7 +167,7 @@
                             About Us
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="aboutDropdown">
-                            <li><a class="dropdown-item" href="#">About Us</a></li>
+                            <li><a class="dropdown-item" href="/Pages/User/About.aspx">About Us</a></li>
                             <li><a class="dropdown-item" runat="server" href="~/Pages/User/Faq.aspx">FAQs</a></li>
                         </ul>
                     </li>
@@ -215,16 +217,21 @@
 
                     <!-- CART ICON + BADGE -->
                     <li class="nav-item">
-                        <a class="nav-link text-light d-flex align-items-center position-relative"
-                           runat="server" href="~/Pages/User/Cart.aspx">
-                            <i class="bi bi-cart fs-3"></i>
+                        <asp:UpdatePanel ID="upCartBadge" runat="server" UpdateMode="Conditional">
+                            <ContentTemplate>
+                                <a class="nav-link text-light d-flex align-items-center position-relative"
+                                   runat="server" href="~/Pages/User/Cart.aspx">
+                                    <i class="bi bi-cart fs-3"></i>
 
-                            <asp:Label ID="lblCartCount" runat="server"
-                                CssClass="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                Style="font-size:.70rem; display:none;">
-                            </asp:Label>
-                        </a>
+                                    <asp:Label ID="lblCartCount" runat="server"
+                                        CssClass="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                        Style="font-size:.70rem; display:none;">
+                                    </asp:Label>
+                                </a>
+                            </ContentTemplate>
+                        </asp:UpdatePanel>
                     </li>
+
 
                 </ul>
 

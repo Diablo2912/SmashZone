@@ -52,6 +52,33 @@ namespace SmashZone.Pages.Admin
             return "Unknown";
         }
 
+        // ✅ Converts DB value into a valid browser URL
+        // DB currently stores: Images/Product_Img/<file>
+        private string BuildImageUrl(string imgFromDb)
+        {
+            string img = (imgFromDb ?? "").ToString().Trim();
+
+            if (string.IsNullOrWhiteSpace(img))
+                return ResolveUrl("~/Images/no-image.png");
+
+            img = img.Replace("\\", "/");
+
+            if (img.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                return img;
+
+            if (img.StartsWith("~/"))
+                return ResolveUrl(img);
+
+            if (img.StartsWith("/"))
+                return img;
+
+            if (img.StartsWith("Images/", StringComparison.OrdinalIgnoreCase))
+                return ResolveUrl("~/" + img);
+
+            // fallback: treat as filename only
+            return ResolveUrl("~/Images/Product_Img/" + img);
+        }
+
         private void LoadProduct(int id, string table)
         {
             using (SqlConnection conn = new SqlConnection(cs))
@@ -81,9 +108,11 @@ WHERE Id = @Id";
                         txtStock.Text = dr["ProductStock"].ToString();
                         txtCategory.Text = dr["ProductCategory"].ToString();
 
-                        string img = dr["ProductImage"].ToString();
+                        string img = (dr["ProductImage"] ?? "").ToString().Trim();
                         hfOldImage.Value = img;
-                        imgPreview.ImageUrl = "~/Images/Product_Img/" + img;
+
+                        // ✅ ONLY set via helper (do not override later)
+                        imgPreview.ImageUrl = BuildImageUrl(img);
                     }
                 }
             }
@@ -117,7 +146,9 @@ WHERE Id = @Id";
                 return;
             }
 
-            string newImageFile = hfOldImage.Value;
+            // DB stores path like: Images/Product_Img/<file>
+            string oldDbValue = (hfOldImage.Value ?? "").ToString().Trim();
+            string newDbValue = oldDbValue; // default: keep existing
 
             if (fuImage.HasFile)
             {
@@ -128,16 +159,24 @@ WHERE Id = @Id";
                     return;
                 }
 
+                // ✅ Save physical file
                 string folder = Server.MapPath("~/Images/Product_Img/");
                 Directory.CreateDirectory(folder);
 
-                newImageFile = Guid.NewGuid().ToString("N") + ext;
-                fuImage.SaveAs(Path.Combine(folder, newImageFile));
+                string newFileName = Guid.NewGuid().ToString("N") + ext;
+                fuImage.SaveAs(Path.Combine(folder, newFileName));
 
-                string old = hfOldImage.Value;
-                string oldPath = Server.MapPath("~/Images/Product_Img/" + old);
-                if (!string.IsNullOrWhiteSpace(old) && File.Exists(oldPath))
-                    File.Delete(oldPath);
+                // ✅ Store consistent DB path
+                newDbValue = "Images/Product_Img/" + newFileName;
+
+                // ✅ Delete old file (handle both "filename" or "Images/Product_Img/filename")
+                string oldFileName = Path.GetFileName(oldDbValue.Replace("\\", "/"));
+                if (!string.IsNullOrWhiteSpace(oldFileName))
+                {
+                    string oldPath = Server.MapPath("~/Images/Product_Img/" + oldFileName);
+                    if (File.Exists(oldPath))
+                        File.Delete(oldPath);
+                }
             }
 
             using (SqlConnection conn = new SqlConnection(cs))
@@ -156,7 +195,7 @@ WHERE Id=@Id";
                         using (SqlCommand cmd = new SqlCommand(sqlSource, conn, tx))
                         {
                             cmd.Parameters.AddWithValue("@Title", title);
-                            cmd.Parameters.AddWithValue("@Image", newImageFile);
+                            cmd.Parameters.AddWithValue("@Image", newDbValue);
                             cmd.Parameters.AddWithValue("@Price", price);
                             cmd.Parameters.AddWithValue("@Desc", desc);
                             cmd.Parameters.AddWithValue("@Stock", stock);
@@ -177,7 +216,7 @@ WHERE SourceTable=@SourceTable AND SourceProductId=@SourceProductId";
                         {
                             cmd.Parameters.AddWithValue("@Sport", GetSportFromTable(table));
                             cmd.Parameters.AddWithValue("@Title", title);
-                            cmd.Parameters.AddWithValue("@Image", newImageFile);
+                            cmd.Parameters.AddWithValue("@Image", newDbValue);
                             cmd.Parameters.AddWithValue("@Price", price);
                             cmd.Parameters.AddWithValue("@Desc", desc);
                             cmd.Parameters.AddWithValue("@Stock", stock);
@@ -202,7 +241,7 @@ VALUES
                             {
                                 cmd.Parameters.AddWithValue("@Sport", GetSportFromTable(table));
                                 cmd.Parameters.AddWithValue("@Title", title);
-                                cmd.Parameters.AddWithValue("@Image", newImageFile);
+                                cmd.Parameters.AddWithValue("@Image", newDbValue);
                                 cmd.Parameters.AddWithValue("@Price", price);
                                 cmd.Parameters.AddWithValue("@Desc", desc);
                                 cmd.Parameters.AddWithValue("@Stock", stock);
@@ -225,8 +264,10 @@ VALUES
             }
 
             ShowMsg("Product updated successfully.", false);
-            imgPreview.ImageUrl = "~/Images/Product_Img/" + newImageFile;
-            hfOldImage.Value = newImageFile;
+
+            // ✅ Update UI + hidden field using DB value
+            imgPreview.ImageUrl = BuildImageUrl(newDbValue);
+            hfOldImage.Value = newDbValue;
         }
 
         protected void btnBack_Click(object sender, EventArgs e)

@@ -6,7 +6,7 @@ using System.Configuration;
 
 namespace SmashZone.Pages.User
 {
-    public partial class Search : System.Web.UI.Page
+    public partial class Search : BasePage
     {
         string cs = ConfigurationManager.ConnectionStrings["SmashZoneCS"].ConnectionString;
 
@@ -91,5 +91,22 @@ AND (@Keyword = '' OR ProductTitle LIKE '%' + @Keyword + '%')
                 pnlEmpty.Visible = dt.Rows.Count == 0;
             }
         }
+
+        protected string GetImgUrl(object productImageObj)
+        {
+            string img = (productImageObj == null) ? "" : productImageObj.ToString().Trim();
+
+            if (string.IsNullOrWhiteSpace(img))
+                return ResolveUrl("~/Images/no-image.png");
+
+            // If DB already stores a full/relative path, use it as-is
+            // e.g. "Images/Product_Img/a.png" or "/Images/Product_Img/a.png"
+            if (img.StartsWith("~") || img.StartsWith("/") || img.Contains("/"))
+                return ResolveUrl(img.StartsWith("~") ? img : "~/" + img.TrimStart('/'));
+
+            // Otherwise assume it's just a filename
+            return ResolveUrl("~/Images/Product_Img/" + img);
+        }
+
     }
 }

@@ -63,6 +63,11 @@
             <h2 class="login-title mb-3">LOGIN</h2>
             <p class="text-muted mb-4">Enter your email and password to login:</p>
 
+            <!-- ✅ MESSAGE PANEL -->
+            <asp:Panel ID="pnlMsg" runat="server" Visible="false" CssClass="mt-3">
+                <asp:Label ID="lblMsg" runat="server" />
+            </asp:Panel>
+
             <div class="center-box">
 
                 <div class="mx-auto" style="width: 390px; margin-left:10px; padding-left:5px">
@@ -76,7 +81,6 @@
                             placeholder="Password"
                             TextMode="Password" />
 
-                        <!-- make whole span clickable -->
                         <span class="input-group-text" id="togglePasswordBtn" style="cursor:pointer;">
                             <i class="bi bi-eye" id="togglePasswordIcon"></i>
                         </span>
@@ -84,12 +88,14 @@
                 </div>
 
                 <div class="mb-4 center-link">
-                    <a runat="server" href="~/Pages/User/passwordReset.aspx" class="small login-link">
+                    <a href="javascript:void(0)"
+                       class="small login-link"
+                       data-bs-toggle="modal"
+                       data-bs-target="#resetModal">
                         <u>Forgot your password?</u>
                     </a>
                 </div>
 
-                <!-- Button text wrapped in span so your overlay effect works -->
                 <asp:Button ID="btnLogin" runat="server"
                     CssClass="btn btn-login w-100 mb-4"
                     Style="max-width: 380px;"
@@ -121,4 +127,38 @@
             });
         })();
     </script>
+
+    <!-- ================= RESET PASSWORD MODAL ================= -->
+    <div class="modal fade" id="resetModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Reset Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="text-muted mb-3">
+                        Enter your email address, a reset link will be sent.
+                    </p>
+
+                    <asp:TextBox ID="txtResetEmail"
+                        runat="server"
+                        CssClass="form-control"
+                        placeholder="Email address" />
+                </div>
+
+                <div class="modal-footer">
+                    <asp:Button ID="btnSendReset"
+                        runat="server"
+                        CssClass="btn btn-dark"
+                        Text="Send Reset Link"
+                        OnClick="btnSendReset_Click" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 </asp:Content>

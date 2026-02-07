@@ -109,6 +109,8 @@ namespace SmashZone.Pages.User
                     SuccessUrl = baseUrl + "/Pages/User/checkoutSuccess.aspx?session_id={CHECKOUT_SESSION_ID}",
                     CancelUrl = baseUrl + "/Pages/User/Cart.aspx",
 
+                    AllowPromotionCodes = true,
+
                     // Optional: helps you link to your user
                     ClientReferenceId = (Session["AccountId"] != null) ? Session["AccountId"].ToString() : null
                 };

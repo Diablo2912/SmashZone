@@ -11,8 +11,17 @@ namespace SmashZone.Pages.User
 {
 
 
-    public partial class Login
+    public partial class passwordReset
     {
+
+        /// <summary>
+        /// form1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlForm form1;
 
         /// <summary>
         /// pnlMsg control.
@@ -33,13 +42,13 @@ namespace SmashZone.Pages.User
         protected global::System.Web.UI.WebControls.Label lblMsg;
 
         /// <summary>
-        /// txtEmail control.
+        /// pnlForm control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtEmail;
+        protected global::System.Web.UI.WebControls.Panel pnlForm;
 
         /// <summary>
         /// txtPassword control.
@@ -51,30 +60,30 @@ namespace SmashZone.Pages.User
         protected global::System.Web.UI.WebControls.TextBox txtPassword;
 
         /// <summary>
-        /// btnLogin control.
+        /// txtConfirmPassword control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnLogin;
+        protected global::System.Web.UI.WebControls.TextBox txtConfirmPassword;
 
         /// <summary>
-        /// txtResetEmail control.
+        /// valConfirmPassword control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtResetEmail;
+        protected global::System.Web.UI.WebControls.CompareValidator valConfirmPassword;
 
         /// <summary>
-        /// btnSendReset control.
+        /// btnReset control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSendReset;
+        protected global::System.Web.UI.WebControls.Button btnReset;
     }
 }

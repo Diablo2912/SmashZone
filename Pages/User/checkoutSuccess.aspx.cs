@@ -18,7 +18,7 @@ using StripeProduct = Stripe.Product;
 
 namespace SmashZone.Pages.User
 {
-    public partial class checkoutSuccess : System.Web.UI.Page
+    public partial class checkoutSuccess : BasePage
     {
         protected void Page_Load(object sender, EventArgs e)
         {

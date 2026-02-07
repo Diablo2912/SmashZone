@@ -7,11 +7,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SmashZone
+namespace SmashZone.Master_Pages
 {
 
 
-    public partial class SiteMaster
+    public partial class UserLogin
     {
 
         /// <summary>
@@ -40,6 +40,15 @@ namespace SmashZone
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.LinkButton btnNavSearch;
+
+        /// <summary>
+        /// upCartBadge control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.UpdatePanel upCartBadge;
 
         /// <summary>
         /// lblCartCount control.

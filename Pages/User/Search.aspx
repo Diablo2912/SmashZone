@@ -229,8 +229,9 @@
                             <div class="card p-card h-100">
 
                                 <div class="p-img-wrap">
-                                    <img src='<%# ResolveUrl("~/Images/Product_Img/" + Eval("ProductImage")) %>'
-                                         class="p-img" />
+                                    <img class="p-img"
+                                         src='<%# GetImgUrl(Eval("ProductImage")) %>'
+                                         alt="product" />
                                 </div>
 
                                 <div class="card-body d-flex flex-column">

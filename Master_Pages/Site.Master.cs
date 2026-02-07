@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Data;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace SmashZone
 {
@@ -9,57 +8,59 @@ namespace SmashZone
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!IsPostBack)
-            {
-                // Only show cart badge if user is logged in
-                bool loggedIn = Session["UserId"] != null;
+            // ✅ Use ONE login key everywhere
+            bool loggedIn = Session["AccountId"] != null;
 
-                var hf = FindControl("hfIsLoggedIn") as HiddenField;
-                if (hf != null) hf.Value = loggedIn ? "1" : "0";
+            if (hfIsLoggedIn != null)
+                hfIsLoggedIn.Value = loggedIn ? "1" : "0";
+        }
 
-                UpdateCartBadge();
-            }
+        // ✅ Runs AFTER all button clicks (no 1-click lag)
+        protected void Page_PreRender(object sender, EventArgs e)
+        {
+            UpdateCartBadge();
+        }
+
+        // Optional: call manually after AddToCart
+        public void RefreshCartBadge()
+        {
+            UpdateCartBadge();
+            if (upCartBadge != null)
+                upCartBadge.Update();
         }
 
         private void UpdateCartBadge()
         {
-            // Cart stored in Session as List<CartItem>
-            var cart = Session["Cart"] as List<CartItem>;
-            int count = 0;
+            // 🔒 SAFETY: never crash again
+            if (lblCartCount == null)
+                return;
 
-            if (cart != null)
+            DataTable cart = Session["Cart"] as DataTable;
+
+            // ✅ DISTINCT ITEMS ONLY
+            int count = (cart == null) ? 0 : cart.Rows.Count;
+
+            if (count > 0)
             {
-                foreach (var item in cart)
-                {
-                    count += item.Quantity;
-                }
+                lblCartCount.Text = count.ToString();
+                lblCartCount.Visible = true;
+                lblCartCount.Style["display"] = "inline-block";
             }
-
-            var lbl = FindControl("lblCartCount") as Label;
-            if (lbl != null)
+            else
             {
-                if (count > 0)
-                {
-                    lbl.Text = count.ToString();
-                    lbl.Visible = true;
-                }
-                else
-                {
-                    lbl.Text = "";
-                    lbl.Visible = false;
-                }
+                lblCartCount.Text = "";
+                lblCartCount.Visible = false;
+                lblCartCount.Style["display"] = "none";
             }
         }
-    }
 
-    // If your project already has this class elsewhere, remove this duplicate.
-    public class CartItem
-    {
-        public int ProductId { get; set; }
-        public string ProductTitle { get; set; }
-        public decimal ProductPrice { get; set; }
-        public int Quantity { get; set; }
-        public string ProductType { get; set; }
-        public string ProductImage { get; set; }
+        protected void btnNavSearch_Click(object sender, EventArgs e)
+        {
+            string q = (txtNavSearch.Text ?? "").Trim();
+            if (q.Length == 0) return;
+
+            Response.Redirect("~/Pages/User/search.aspx?q=" + Server.UrlEncode(q));
+        }
+
     }
 }
